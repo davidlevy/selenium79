@@ -148,28 +148,16 @@ const isLoggedIn = Boolean(Astro.locals.user);
 					<p class="footer-community-blurb">{profile.community.blurb}</p>
 				</div>
 				<div class="footer-right">
-					<div class="theme-switcher">
-						<button
-							type="button"
-							class="theme-btn"
-							data-theme="light"
-							aria-pressed="false"
-							aria-label="Light mode">Light</button
-						>
-						<button
-							type="button"
-							class="theme-btn"
-							data-theme="dark"
-							aria-pressed="false"
-							aria-label="Dark mode">Dark</button
-						>
-						<button
-							type="button"
-							class="theme-btn"
-							data-theme="system"
-							aria-pressed="false"
-							aria-label="System theme">System</button
-						>
+					<div class="theme-switcher" role="group" aria-label="Colour theme">
+						<button type="button" class="theme-btn" data-theme="light" aria-pressed="false" aria-label="Light theme" title="Light theme">
+							<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
+						</button>
+						<button type="button" class="theme-btn" data-theme="dark" aria-pressed="false" aria-label="Dark theme" title="Dark theme">
+							<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z" /></svg>
+						</button>
+						<button type="button" class="theme-btn" data-theme="system" aria-pressed="false" aria-label="System theme" title="System theme">
+							<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
+						</button>
 					</div>
 					<span class="built-tag">Built with <b>Claude Code</b><span class="built-sep" aria-hidden="true"></span><b>Opus 5.5</b></span>
 					<p class="footer-powered">
@@ -422,32 +410,47 @@ const isLoggedIn = Boolean(Astro.locals.user);
 				gap: var(--spacing-md);
 			}
 
+			/* segmented icon control: sun / moon / screen */
 			.theme-switcher {
-				display: flex;
-				gap: var(--spacing-xs);
+				display: inline-flex;
+				padding: 2px;
+				gap: 2px;
+				border: 1px solid var(--color-border);
+				border-radius: 999px;
 			}
 
 			.theme-btn {
+				display: grid;
+				place-items: center;
+				width: 2rem;
+				height: 1.75rem;
 				background: transparent;
-				border: 1px solid var(--color-border);
+				border: 0;
+				border-radius: 999px;
 				color: var(--color-muted);
-				font-family: var(--font-body);
-				font-size: var(--font-size-sm);
-				padding: var(--spacing-xs) var(--spacing-sm);
-				border-radius: var(--radius);
 				cursor: pointer;
-				transition: all var(--transition-fast);
+				transition:
+					color var(--transition-fast),
+					background var(--transition-fast);
+			}
+
+			.theme-btn svg {
+				width: 0.95rem;
+				height: 0.95rem;
 			}
 
 			.theme-btn:hover {
 				color: var(--color-text);
-				border-color: var(--color-text);
 			}
 
 			.theme-btn.active {
-				background: var(--color-surface);
-				color: var(--color-text);
-				border-color: var(--color-brand);
+				background: color-mix(in srgb, var(--color-brand) 16%, transparent);
+				color: var(--color-brand);
+			}
+
+			.theme-btn:focus-visible {
+				outline: 2px solid var(--color-brand);
+				outline-offset: 1px;
 			}
 
 			.footer-brand {
