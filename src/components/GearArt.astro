@@ -1,0 +1,300 @@
+---
+// Isometric wireframe drawings of gear, in the same line style as the hero.
+// Geometry is generated at render time: x runs down-right, y (depth) up-right, z up.
+interface Props {
+	kind: "korg-x5" | "atari-st" | "delorean" | "yamaha-qx5" | "logi-lift";
+	label: string;
+}
+const { kind, label } = Astro.props;
+
+const C = Math.cos(Math.PI / 6);
+const U = 14; // px per unit
+type V = [number, number, number];
+const P = ([x, y, z]: V): [number, number] => [(x + y) * C * U, ((x - y) * 0.5 - z) * U];
+const all: [number, number][] = [];
+const pt = (v: V) => {
+	const p = P(v);
+	all.push(p);
+	return `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+};
+const out: string[] = [];
+const poly = (vs: V[], cls = "w") => out.push(`<polygon class="${cls}" points="${vs.map(pt).join(" ")}"/>`);
+const line = (a: V, b: V, cls = "l") => {
+	const [p, q] = [P(a), P(b)];
+	all.push(p, q);
+	out.push(`<line class="${cls}" x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}"/>`);
+};
+/** Visible faces of an axis-aligned box: front (y0), right (x1), top. */
+const box = (x0: number, y0: number, z0: number, w: number, d: number, h: number, cls = "w", topCls = cls) => {
+	const [x1, y1, z1] = [x0 + w, y0 + d, z0 + h];
+	poly([[x0, y0, z1], [x1, y0, z1], [x1, y0, z0], [x0, y0, z0]], cls);
+	poly([[x1, y0, z1], [x1, y1, z1], [x1, y1, z0], [x1, y0, z0]], cls);
+	poly([[x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]], topCls);
+};
+/** Text sheared onto a plane: along x, "down" towards -y (top) or -z (front). */
+const text = (s: string, at: V, size: number, plane: "top" | "front", cls = "t") => {
+	const o = P(at);
+	const m =
+		plane === "top"
+			? `matrix(${C * U},${0.5 * U},${-C * U},${0.5 * U},${o[0].toFixed(1)},${o[1].toFixed(1)})`
+			: `matrix(${C * U},${0.5 * U},0,${U},${o[0].toFixed(1)},${o[1].toFixed(1)})`;
+	out.push(`<text class="${cls}" font-size="${size}" transform="${m}">${s}</text>`);
+};
+/** Circle in the x–z plane at depth y (a wheel seen from the front face). */
+const wheel = (cx: number, y: number, cz: number, r: number) => {
+	const ring = (rr: number, cls: string) => {
+		const vs: V[] = [];
+		for (let i = 0; i < 28; i++) {
+			const a = (i / 28) * Math.PI * 2;
+			vs.push([cx + rr * Math.cos(a), y, cz + rr * Math.sin(a)]);
+		}
+		poly(vs, cls);
+	};
+	ring(r, "w");
+	ring(r * 0.55, "w s");
+	ring(r * 0.18, "f");
+};
+
+if (kind === "korg-x5") {
+	// Korg X5 (1994): 61-key synth, LCD + button panel at the back
+	const W = 18, D = 5.4;
+	box(0, 0, 0, W, D, 0.9);
+	poly([[0.4, 0.25, 0.9], [W - 0.4, 0.25, 0.9], [W - 0.4, 3.05, 0.9], [0.4, 3.05, 0.9]], "w s"); // key bed
+	const n = 36, kw = (W - 0.8) / n;
+	for (let i = 1; i < n; i++) line([0.4 + i * kw, 0.25, 0.9], [0.4 + i * kw, 3.05, 0.9]);
+	const black = [1, 2, 4, 5, 6];
+	for (let o = 0; o < 5; o++)
+		for (const b of black) {
+			const x = 0.4 + (o * 7 + b) * kw - kw * 0.3;
+			box(x, 1.45, 0.9, kw * 0.6, 1.6, 0.22, "w k");
+		}
+	poly([[6, 3.55, 0.9], [9.8, 3.55, 0.9], [9.8, 4.75, 0.9], [6, 4.75, 0.9]], "w lcd"); // LCD
+	text("PROG A.01  Grand Piano", [6.25, 3.85, 0.9], 0.34, "top", "t lcd-t");
+	for (let r = 0; r < 2; r++)
+		for (let c = 0; c < 8; c++) box(10.5 + c * 0.75, 3.55 + r * 0.7, 0.9, 0.45, 0.4, 0.1, "w");
+	line([1.2, 3.7, 0.9], [1.2, 4.9, 0.9], "l s"); // volume slider
+	box(1.0, 4.1, 0.9, 0.4, 0.3, 0.15, "w");
+	box(2.3, 3.8, 0.9, 0.9, 0.9, 0.15, "w"); // joystick base
+	line([2.75, 4.25, 1.05], [3.05, 4.55, 1.85], "l s");
+	text("KORG", [3.8, 3.75, 0.9], 0.42, "top", "t b");
+	text("X5", [3.8, 4.55, 0.9], 0.5, "top", "t acc");
+}
+
+if (kind === "atari-st") {
+	// Atari 520 ST (1985): wedge keyboard computer, slanted F-keys, built-in MIDI; mouse on the side
+	const W = 14, D = 6.2, zf = 0.55, zb = 1.25;
+	const zAt = (y: number) => zf + ((zb - zf) * y) / D;
+	poly([[0, 0, zf], [W, 0, zf], [W, 0, 0], [0, 0, 0]]);
+	poly([[W, 0, zf], [W, D, zb], [W, D, 0], [W, 0, 0]]);
+	poly([[0, 0, zf], [W, 0, zf], [W, D, zb], [0, D, zb]]);
+	const key = (x: number, y: number, w: number, d: number, skew = 0, cls = "w") => {
+		const z0 = zAt(y), z1 = zAt(y + d);
+		poly([[x, y, z0 + 0.08], [x + w, y, z0 + 0.08], [x + w + skew, y + d, z1 + 0.08], [x + skew, y + d, z1 + 0.08]], cls);
+	};
+	for (let r = 0; r < 5; r++) {
+		const cols = [13, 13, 12, 11, 1][r];
+		const y = 0.5 + r * 0.82;
+		if (r === 4) {
+			key(2.2, y, 6.2, 0.62); // space bar
+			continue;
+		}
+		const off = 0.5 + r * 0.25;
+		for (let c = 0; c < cols; c++) key(off + c * 0.72, y, 0.6, 0.62);
+	}
+	for (let c = 0; c < 10; c++) key(0.6 + c * 0.95, 4.85, 0.8, 0.45, 0.35); // slanted function keys
+	for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) key(10.4 + c * 0.72, 0.5 + r * 0.82, 0.6, 0.62);
+	text("ATARI", [10.3, 5.0, zAt(5.0)], 0.48, "top", "t b");
+	text("520 ST", [12.1, 5.0, zAt(5.0)], 0.36, "top", "t acc");
+	// MIDI IN/OUT on the right side
+	for (const y of [3.4, 4.4]) {
+		const vs: V[] = [];
+		for (let i = 0; i < 20; i++) {
+			const a = (i / 20) * Math.PI * 2;
+			vs.push([W, y + 0.28 * Math.cos(a), 0.45 + 0.28 * Math.sin(a)]);
+		}
+		poly(vs, "w s");
+	}
+	// mouse with cable
+	box(W + 1.4, 1.0, 0, 1.3, 2.0, 0.45, "w", "w");
+	line([W + 1.4, 2.25, 0.45], [W + 2.7, 2.25, 0.45], "l s");
+	const a = P([W + 2.05, 3.0, 0.3]), b = P([W, 5.6, 0.6]);
+	all.push(a, b);
+	out.push(`<path class="l s" d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${(a[0] + 30).toFixed(1)},${(a[1] - 40).toFixed(1)} ${(b[0] + 40).toFixed(1)},${(b[1] + 10).toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}"/>`);
+}
+
+if (kind === "delorean") {
+	// DeLorean DMC-12 (1981): wedge body, louvred rear window, gull-wing doors up
+	const L = 12, Wd = 4.6;
+	box(0, 0, 0.7, L, Wd, 1.2); // lower body
+	// nose wedge (front at x = 0 is hidden; give the bonnet a slope on the top face)
+	line([0, 0, 1.9], [0, Wd, 1.9], "l s");
+	// cabin as a frustum: base x 3..9.2, roof x 4.6..7.6
+	const b0: V[] = [[3, 0.35, 1.9], [9.2, 0.35, 1.9], [9.2, Wd - 0.35, 1.9], [3, Wd - 0.35, 1.9]];
+	const t0: V[] = [[4.6, 0.7, 3.0], [7.6, 0.7, 3.0], [7.6, Wd - 0.7, 3.0], [4.6, Wd - 0.7, 3.0]];
+	poly([b0[0], b0[1], t0[1], t0[0]]); // side
+	poly([b0[1], b0[2], t0[2], t0[1]]); // rear slope
+	poly([t0[0], t0[1], t0[2], t0[3]]); // roof
+	poly([[3.5, 0.42, 2.05], [8.6, 0.42, 2.05], [7.45, 0.68, 2.85], [4.75, 0.68, 2.85]], "w s"); // side window
+	for (let i = 1; i < 6; i++) {
+		const f = i / 6;
+		line([9.2 - 1.6 * f, 0.35 + 0.35 * f, 1.9 + 1.1 * f], [9.2 - 1.6 * f, Wd - 0.35 - 0.35 * f, 1.9 + 1.1 * f]); // louvres
+	}
+	// gull-wing door, open
+	poly([[4.8, 0.7, 3.0], [7.4, 0.7, 3.0], [7.4, -0.9, 3.9], [4.8, -0.9, 3.9]], "w door");
+	poly([[5.1, 0.35, 3.18], [7.1, 0.35, 3.18], [7.1, -0.6, 3.72], [5.1, -0.6, 3.72]], "w s");
+	// rear: tail-light band and plate
+	poly([[L, 0.5, 1.5], [L, Wd - 0.5, 1.5], [L, Wd - 0.5, 1.75], [L, 0.5, 1.75]], "w s");
+	const o = P([L, 1.4, 1.25]);
+	all.push(o);
+	out.push(`<text class="t acc" font-size="0.42" transform="matrix(${(C * U).toFixed(2)},${(-0.5 * U).toFixed(2)},0,${U},${o[0].toFixed(1)},${o[1].toFixed(1)})">OUTATIME</text>`);
+	line([2.2, 0, 1.3], [9.8, 0, 1.3], "l s"); // body crease
+	wheel(2.6, -0.05, 0.85, 0.85);
+	wheel(9.6, -0.05, 0.85, 0.85);
+	// flux of the time circuits: two sparks off the rear
+	for (const [dx, dz] of [[1.2, 0.4], [1.8, 1.1]]) line([L + 0.3, 1.2, 0.6 + dz], [L + 0.3 + dx, 1.2, 0.3 + dz], "l acc-l");
+}
+
+if (kind === "yamaha-qx5") {
+	// Yamaha QX5 (1986): digital sequence recorder — sloped front panel, LCD, transport keys
+	const W = 13, D = 8, zf = 0.4, zt = 1.1, ys = 2.9;
+	poly([[0, 0, zf], [W, 0, zf], [W, 0, 0], [0, 0, 0]]);
+	poly([[W, 0, zf], [W, ys, zt], [W, D, zt], [W, D, 0], [W, 0, 0]]);
+	poly([[0, ys, zt], [W, ys, zt], [W, D, zt], [0, D, zt]]); // top
+	poly([[0, 0, zf], [W, 0, zf], [W, ys, zt], [0, ys, zt]]); // sloped panel
+	const zAt = (y: number) => zf + ((zt - zf) * y) / ys;
+	const pad = (x: number, y: number, w: number, d: number, cls = "w") =>
+		poly([[x, y, zAt(y) + 0.06], [x + w, y, zAt(y) + 0.06], [x + w, y + d, zAt(y + d) + 0.06], [x, y + d, zAt(y + d) + 0.06]], cls);
+	pad(0.8, 0.5, 2.6, 1.0, "w lcd");
+	text("SONG 01  BAR 017", [0.95, 0.75, zAt(0.75) + 0.06], 0.26, "top", "t lcd-t");
+	text("YAMAHA", [0.8, 1.85, zAt(1.85)], 0.34, "top", "t b");
+	text("QX5", [2.75, 1.85, zAt(1.85)], 0.42, "top", "t acc");
+	for (let r = 0; r < 3; r++) for (let c = 0; c < 7; c++) pad(4.2 + c * 0.62, 0.45 + r * 0.72, 0.4, 0.32);
+	for (let c = 0; c < 3; c++) pad(9.2 + c * 1.15, 0.9, 0.85, 0.85, c === 1 ? "w lcd" : "w k");
+	// printed reference chart on the top panel
+	poly([[1, 3.6, zt], [8.5, 3.6, zt], [8.5, 7.2, zt], [1, 7.2, zt]], "w s");
+	for (let i = 1; i < 6; i++) line([1.3, 3.6 + i * 0.6, zt], [8.2 - (i % 2) * 1.6, 3.6 + i * 0.6, zt]);
+	line([4.7, 3.7, zt], [4.7, 7.1, zt], "l s");
+	// MIDI cable out the back
+	const a = P([W, 6.5, 0.6]), b = P([W + 3, 9, 0.2]);
+	all.push(a, b);
+	out.push(`<path class="l s" d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${(a[0] + 30).toFixed(1)},${(a[1] + 5).toFixed(1)} ${(b[0] - 10).toFixed(1)},${(b[1] - 30).toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}"/>`);
+}
+
+if (kind === "logi-lift") {
+	// Logitech Lift (2022): vertical ergonomic mouse — contoured grip drawn as surface contours
+	const L = 6, N = 40;
+	const bell = (s: number) => Math.pow(Math.sin(Math.PI * s), 0.75);
+	const front = (s: number): V => [L * s, 1.9 - 1.8 * bell(s), 0];
+	const back = (s: number): V => [L * s, 2.1 + 1.6 * bell(s), 0];
+	const ridge = (s: number): V => [L * s, 2.9, 2.7 * Math.pow(Math.sin(Math.PI * Math.min(1, s * 1.08)), 0.55) * (0.75 + 0.25 * s)];
+	const lerp = (a: V, b: V, k: number): V => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+	// bulge the grip outward a little between footprint and ridge
+	const surf = (s: number, k: number): V => {
+		const p = lerp(front(s), ridge(s), k);
+		return [p[0], p[1] - 0.6 * Math.sin(Math.PI * k) * bell(s), p[2]];
+	};
+	const S = (f: (s: number) => V) => Array.from({ length: N + 1 }, (_, i) => f(i / N));
+	poly([...S(back), ...S(ridge).reverse()], "w s"); // back side
+	poly([...S((s) => surf(s, 0)), ...S((s) => surf(1 - s, 1))]); // grip face
+	for (let k = 1; k < 7; k++) {
+		const pts = S((s) => surf(s, k / 7)).map(pt).join(" ");
+		out.push(`<polyline class="l s" points="${pts}"/>`);
+	}
+	// buttons near the top of the grip, scroll wheel on the ridge
+	out.push(`<polyline class="l" points="${S((s) => surf(0.18 + s * 0.62, 0.76)).map(pt).join(" ")}"/>`);
+	line(surf(0.5, 0.76), surf(0.5, 1), "l");
+	const w0 = surf(0.42, 0.97), w1 = surf(0.58, 0.97);
+	poly([w0, w1, [w1[0], w1[1] + 0.35, w1[2] + 0.25], [w0[0], w0[1] + 0.35, w0[2] + 0.25]], "w acc-w");
+	text("logi", [L * 0.36, 0.55, 0.75], 0.4, "front", "t");
+}
+
+const xs = all.map((p) => p[0]), ys = all.map((p) => p[1]);
+const pad = 10;
+const vb = [Math.min(...xs) - pad, Math.min(...ys) - pad, Math.max(...xs) - Math.min(...xs) + pad * 2, Math.max(...ys) - Math.min(...ys) + pad * 2]
+	.map((v) => v.toFixed(0))
+	.join(" ");
+---
+
+<svg class="gear-art" viewBox={vb} role="img" aria-label={`Wireframe drawing: ${label}`}>
+	<Fragment set:html={out.join("")} />
+</svg>
+
+<style>
+	.gear-art {
+		display: block;
+		width: 100%;
+		height: 100%;
+		color: var(--color-line);
+		overflow: visible;
+	}
+
+	.gear-art :global(.w) {
+		fill: var(--color-bg);
+		stroke: currentColor;
+		stroke-width: 1;
+		stroke-linejoin: round;
+		vector-effect: non-scaling-stroke;
+		transition: stroke 200ms ease;
+	}
+
+	.gear-art :global(.s) {
+		stroke-opacity: 0.6;
+	}
+
+	.gear-art :global(.k) {
+		stroke: var(--color-line-strong);
+		stroke-opacity: 0.7;
+	}
+
+	.gear-art :global(.l) {
+		stroke: currentColor;
+		stroke-width: 1;
+		vector-effect: non-scaling-stroke;
+		stroke-opacity: 0.55;
+		fill: none;
+	}
+
+	.gear-art :global(.f) {
+		fill: currentColor;
+		stroke: none;
+		opacity: 0.6;
+	}
+
+	.gear-art :global(.lcd) {
+		fill: color-mix(in srgb, var(--color-brand) 10%, var(--color-bg));
+		stroke: var(--color-brand);
+	}
+
+	.gear-art :global(.acc-w) {
+		stroke: var(--color-brand);
+	}
+
+	.gear-art :global(.door) {
+		stroke: var(--color-line-strong);
+	}
+
+	.gear-art :global(.t) {
+		font-family: var(--font-mono), ui-monospace, monospace;
+		fill: var(--color-line-strong);
+		letter-spacing: 0.05px;
+	}
+
+	.gear-art :global(.t.b) {
+		font-weight: 500;
+	}
+
+	.gear-art :global(.acc),
+	.gear-art :global(.lcd-t) {
+		fill: var(--color-brand);
+	}
+
+	.gear-art :global(.acc-l) {
+		stroke: var(--color-brand);
+		stroke-opacity: 0.9;
+	}
+
+	/* hover the card: lines light up in the accent */
+	:global(.gear:hover) .gear-art {
+		color: color-mix(in srgb, var(--color-brand) 70%, var(--color-line));
+	}
+</style>

@@ -42,9 +42,22 @@ export const profile = {
 	// "Recommended" section: sites worth a visit (GitHub stars are fetched live)
 	recommended: [
 		{
+			name: "HaMeetupers · המיטאפרים",
+			url: "https://hamitaperim.com/",
+			blurb: "Every in-person tech meetup in Tel Aviv and around, updated daily from Meetup, Luma, LinkedIn and community calendars.",
+		},
+		{
 			name: "Skills IL",
 			url: "https://agentskills.co.il/",
 			blurb: "Free, open-source, security-screened skills and MCP servers for AI agents — with a focus on Hebrew and Israeli topics.",
 		},
 	],
+	// "Gear I love" section — drawn as wireframes by GearArt
+	gear: [
+		{ kind: "korg-x5", name: "Korg X5", year: "1994", note: "My first synth. 61 keys and endless AI² presets." },
+		{ kind: "yamaha-qx5", name: "Yamaha QX5", year: "1986", note: "A hardware sequencer — my first loops, recorded bar by bar." },
+		{ kind: "atari-st", name: "Atari 520 ST", year: "1985", note: "MIDI ports built in: where code and music first met." },
+		{ kind: "logi-lift", name: "Logitech Lift", year: "2022", note: "Vertical mouse. My wrist says thank you, daily." },
+		{ kind: "delorean", name: "DeLorean DMC-12", year: "1981", note: "Stainless steel, gull-wing doors, 1.21 gigawatts." },
+	] as const,
 };
