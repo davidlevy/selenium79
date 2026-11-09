@@ -6,7 +6,6 @@ import ProjectCard from "../components/ProjectCard.astro";
 import HeroKeys from "../components/HeroKeys.astro";
 import SocialButtons from "../components/SocialButtons.astro";
 import Arrow from "../components/Arrow.astro";
-import YouTube from "../components/YouTube.astro";
 import { profile } from "../profile";
 
 const [settings, projectsResult, experienceResult, aboutResult, musicResult] = await Promise.all([
@@ -27,7 +26,6 @@ if (Astro.cache?.enabled) {
 }
 const about = aboutResult.entry;
 const tracks = [...musicResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
-const soundcloudPlayer = `https://w.soundcloud.com/player/?url=${encodeURIComponent(profile.soundcloud)}&color=%2399d3ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`;
 const projects = projectsResult.entries;
 const roles = [...experienceResult.entries].sort(
 	(a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99),
@@ -119,38 +117,9 @@ const github = settings?.social?.github;
 		)
 	}
 
-	<section id="music" class="wrap section">
-		<header class="section-head framed music-head">
-			<span class="mono">03</span>
-			<h2>Music</h2>
-			<p class="music-sub">Piano, melodica &amp; improvisation</p>
-			<SocialButtons soundcloud={profile.soundcloud} />
-		</header>
-		<div class="cells music">
-			<div class="sc-cell">
-				<iframe
-					title="David Levy on SoundCloud"
-					src={soundcloudPlayer}
-					loading="lazy"
-					allow="autoplay; encrypted-media"
-					scrolling="no"
-				></iframe>
-			</div>
-			{tracks.map((t, i) => (
-				<figure class:list={["track", { featured: i === 0 }]}>
-					<YouTube url={t.data.video} title={t.data.title} />
-					<figcaption>
-						<span class="track-title" {...t.edit.title}>{t.data.title}</span>
-						{t.data.note && <span class="track-note mono">{t.data.note}</span>}
-					</figcaption>
-				</figure>
-			))}
-		</div>
-	</section>
-
 	<section id="about" class="wrap section">
 		<header class="section-head">
-			<span class="mono">04</span>
+			<span class="mono">03</span>
 			<h2>About</h2>
 		</header>
 		<div class="about">
@@ -164,6 +133,33 @@ const github = settings?.social?.github;
 				</ul>
 			</aside>
 		</div>
+	</section>
+
+	<section id="music" class="wrap section">
+		<header class="section-head framed music-head">
+			<span class="mono">04</span>
+			<h2>Music</h2>
+			<p class="music-sub">Piano, melodica &amp; improvisation</p>
+			<a class="sc-link" href={profile.soundcloud} target="_blank" rel="noopener noreferrer">
+				<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 7.6a5 5 0 0 1 8.7 2.9A3.2 3.2 0 1 1 20.8 17H11zM9.2 9h1v8h-1zM7.4 10h1v7h-1zM5.6 9.5h1V17h-1zM3.8 11h1v6h-1zM2 12.5h1V17H2z" /></svg>
+				SoundCloud <Arrow />
+			</a>
+		</header>
+		<ol class="tracklist">
+			{tracks.map((t, i) => (
+				<li>
+					<a class="track" href={t.data.video} target="_blank" rel="noopener noreferrer">
+						<span class="track-n mono">{String(i + 1).padStart(2, "0")}</span>
+						<span class="track-text">
+							<span class="track-title" {...t.edit.title}>{t.data.title}</span>
+							{t.data.note && <span class="track-note mono">{t.data.note}</span>}
+						</span>
+						<svg class="track-play" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M5 3.5v9l7.5-4.5z" /></svg>
+						<span class="visually-hidden">(YouTube, opens in a new tab)</span>
+					</a>
+				</li>
+			))}
+		</ol>
 	</section>
 
 	<section id="contact" class="wrap section cta">
@@ -460,79 +456,107 @@ const github = settings?.social?.github;
 		font-size: var(--font-size-sm);
 	}
 
-	.music-head :global(.social) {
+	.sc-link {
 		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: var(--font-size-sm);
+		color: var(--color-muted);
+		text-decoration: none;
+		transition: color var(--transition-fast);
 	}
 
-	.music-head :global(.sbtn) {
-		min-height: 2.25rem;
-		padding-block: 0.4rem;
+	.sc-link svg:first-child {
+		width: 1.1rem;
+		height: 1.1rem;
+		color: #ff5500;
 	}
 
-	/* 1 featured (2×2) + 12 videos = 16 slots: fills 4, 2 or 1 columns with no gaps */
-	.music {
-		grid-template-columns: 1fr;
+	.sc-link:hover {
+		color: var(--color-text);
 	}
 
-	@media (min-width: 560px) {
-		.music {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-
-		.track.featured {
-			grid-column: span 2;
-		}
+	/* Compact tracklist inside the frame: rows only, so any count fits */
+	.tracklist {
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+		column-gap: var(--spacing-xl);
+		padding: var(--spacing-xs) var(--spacing-lg) var(--spacing-md);
+		border: 1px solid var(--color-border);
 	}
 
-	@media (min-width: 1100px) {
-		.music {
-			grid-template-columns: repeat(4, minmax(0, 1fr));
-		}
-
-		.track.featured {
-			grid-row: span 2;
-		}
-	}
-
-	.track.featured :global(.yt) {
-		flex: 1;
-		aspect-ratio: auto !important;
-		min-height: 14rem;
-	}
-
-	.sc-cell {
-		grid-column: 1 / -1;
-	}
-
-	.sc-cell iframe {
-		display: block;
-		width: 100%;
-		height: 300px;
-		border: 0;
-		border-radius: 6px;
+	.tracklist li {
+		border-bottom: 1px solid var(--color-border);
 	}
 
 	.track {
 		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-sm);
+		align-items: center;
+		gap: var(--spacing-md);
+		padding-block: 0.7rem;
+		text-decoration: none;
+		color: var(--color-text);
 	}
 
-	.track figcaption {
+	.track-n {
+		color: var(--color-muted);
+		font-size: 0.66rem;
+	}
+
+	.track-text {
+		flex: 1;
+		min-width: 0;
 		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
+		align-items: baseline;
+		gap: var(--spacing-sm);
+		overflow: hidden;
 	}
 
 	.track-title {
-		font-weight: 500;
-		letter-spacing: -0.01em;
+		font-size: var(--font-size-sm);
+		white-space: nowrap;
 	}
 
 	.track-note {
-		font-size: 0.66rem;
+		font-size: 0.62rem;
 		text-transform: none;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.03em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.track-play {
+		width: 0.8rem;
+		height: 0.8rem;
+		color: var(--color-muted);
+		flex: none;
+		transition: color var(--transition-fast), transform var(--transition-fast);
+	}
+
+	.track:hover .track-title,
+	.track:hover .track-play {
+		color: var(--color-brand);
+	}
+
+	.track:hover .track-play {
+		transform: scale(1.2);
+	}
+
+	.track:focus-visible {
+		outline: 2px solid var(--color-brand);
+		outline-offset: 2px;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
 	}
 
 	.about {

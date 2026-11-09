@@ -3,10 +3,9 @@ interface Props {
 	linkedin?: string;
 	github?: string;
 	email?: string;
-	soundcloud?: string;
 	center?: boolean;
 }
-const { linkedin, github, email, soundcloud, center } = Astro.props;
+const { linkedin, github, email, center } = Astro.props;
 ---
 
 <div class:list={["social", { center }]}>
@@ -33,19 +32,6 @@ const { linkedin, github, email, soundcloud, center } = Astro.props;
 					/>
 				</svg>
 				GitHub
-			</a>
-		)
-	}
-	{
-		soundcloud && (
-			<a class="sbtn sbtn-soundcloud" href={soundcloud} target="_blank" rel="noopener noreferrer">
-				<svg viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						fill="currentColor"
-						d="M11 7.6a5 5 0 0 1 8.7 2.9A3.2 3.2 0 1 1 20.8 17H11zM9.2 9h1v8h-1zM7.4 10h1v7h-1zM5.6 9.5h1V17h-1zM3.8 11h1v6h-1zM2 12.5h1V17H2z"
-					/>
-				</svg>
-				SoundCloud
 			</a>
 		)
 	}
@@ -115,11 +101,6 @@ const { linkedin, github, email, soundcloud, center } = Astro.props;
 	.sbtn-github {
 		background: light-dark(#1f2328, #eef1f5);
 		color: light-dark(#fff, #1f2328);
-	}
-
-	.sbtn-soundcloud {
-		background: #ff5500;
-		color: #fff;
 	}
 
 	.sbtn-mail {
