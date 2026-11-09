@@ -7,6 +7,7 @@ import HeroKeys from "../components/HeroKeys.astro";
 import SocialButtons from "../components/SocialButtons.astro";
 import Arrow from "../components/Arrow.astro";
 import MusicGrid from "../components/MusicGrid.astro";
+import { formatStars, getRecentStars } from "../lib/github";
 import { profile } from "../profile";
 
 const [settings, projectsResult, experienceResult, aboutResult, musicResult] = await Promise.all([
@@ -39,6 +40,8 @@ const name = settings?.title || "Your Name";
 const linkedin = settings?.social?.linkedin;
 const github = settings?.social?.github;
 const twitter = settings?.social?.twitter;
+const githubUser = github?.match(/github\.com\/([^/?#]+)/)?.[1];
+const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
 ---
 
 <Base>
@@ -204,8 +207,49 @@ const twitter = settings?.social?.twitter;
 		)
 	}
 
+	<section id="recommended" class="wrap section">
+		<header class="section-head framed music-head">
+			<span class="mono">05</span>
+			<h2>Recommended</h2>
+			<p class="music-sub">Sites I like &amp; repos I starred recently</p>
+			{github && (
+				<a class="sc-link" href={`${github}?tab=stars`} target="_blank" rel="noopener noreferrer">
+					GitHub stars <Arrow />
+				</a>
+			)}
+		</header>
+		<ol class="cells recs">
+			{profile.recommended.map((r) => (
+				<li class="rec-site">
+					<a class="rec" href={r.url} target="_blank" rel="noopener noreferrer">
+						<span class="rec-top mono">
+							<span class="rec-tag">Site</span>
+							<Arrow />
+						</span>
+						<span class="rec-title">{r.name}</span>
+						<span class="rec-desc">{r.blurb}</span>
+						<span class="rec-meta mono">{new URL(r.url).hostname.replace(/^www\./, "")}</span>
+					</a>
+				</li>
+			))}
+			{stars.map((r) => (
+				<li>
+					<a class="rec" href={r.url} target="_blank" rel="noopener noreferrer">
+						<span class="rec-top mono">
+							<span>{r.name.split("/")[0]}</span>
+							<span>★ {formatStars(r.stars)}</span>
+						</span>
+						<span class="rec-title">{r.name.split("/")[1]}</span>
+						<span class="rec-desc">{r.description}</span>
+						<span class="rec-meta mono">{r.language ?? "GitHub"}</span>
+					</a>
+				</li>
+			))}
+		</ol>
+	</section>
+
 	<section id="contact" class="wrap section cta">
-		<p class="mono">05 · Contact</p>
+		<p class="mono">06 · Contact</p>
 		<h2 class="cta-title">Let’s talk.</h2>
 		<p class="cta-sub">The quickest way to reach me is LinkedIn.</p>
 		<div class="intro-actions">
@@ -467,6 +511,96 @@ const twitter = settings?.social?.twitter;
 	.cta-sub {
 		margin-top: var(--spacing-sm);
 		color: var(--color-muted);
+	}
+
+	/* Recommended: small cells like the music grid */
+	/* sites take a double cell: 1 site (2) + 10 stars = 12 slots → full rows at 4, 2 or 1 columns */
+	.recs {
+		list-style: none;
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	@media (min-width: 560px) {
+		.recs {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.recs > .rec-site {
+			grid-column: span 2;
+		}
+	}
+
+	@media (min-width: 1100px) {
+		.recs {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+
+	.rec-site .rec-desc {
+		-webkit-line-clamp: 3;
+	}
+
+	.recs > li {
+		padding: 0;
+	}
+
+	.rec {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		height: 100%;
+		min-height: 8.5rem;
+		padding: var(--spacing-md) var(--spacing-lg);
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.rec-top {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--spacing-sm);
+		font-size: 0.62rem;
+		text-transform: none;
+		letter-spacing: 0.04em;
+		white-space: nowrap;
+		overflow: hidden;
+	}
+
+	.rec-tag {
+		color: var(--color-brand);
+	}
+
+	.rec-title {
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.rec-desc {
+		font-size: 0.78rem;
+		line-height: 1.45;
+		color: var(--color-muted);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.rec-meta {
+		margin-top: auto;
+		font-size: 0.62rem;
+		text-transform: none;
+	}
+
+	.rec:hover .rec-title {
+		color: var(--color-brand);
+	}
+
+	.rec:focus-visible {
+		outline: 2px solid var(--color-brand);
+		outline-offset: -2px;
 	}
 
 	.music-head {

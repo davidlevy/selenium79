@@ -39,4 +39,12 @@ export const profile = {
 		{ label: "Coldplay — a sky full of stars", icon: "stars" },
 	],
 	community: { name: "Agentic Israel", url: "https://www.agenticisrael.com/", blurb: "Israel's English-speaking community for people building with AI" },
+	// "Recommended" section: sites worth a visit (GitHub stars are fetched live)
+	recommended: [
+		{
+			name: "Skills IL",
+			url: "https://agentskills.co.il/",
+			blurb: "Free, open-source, security-screened skills and MCP servers for AI agents — with a focus on Hebrew and Israeli topics.",
+		},
+	],
 };
