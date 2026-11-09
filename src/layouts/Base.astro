@@ -95,9 +95,6 @@ const isLoggedIn = Boolean(Astro.locals.user);
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />
-		<div class="built-with">
-			<span class="built-tag">Built with <b>Claude Code</b><span class="built-sep" aria-hidden="true"></span><b>Opus 5.5</b></span>
-		</div>
 		<header class="site-header">
 			<nav class="nav">
 				<a href="/" class="site-title" aria-label={`selenium79 — ${siteTitle}, home`}>
@@ -174,6 +171,7 @@ const isLoggedIn = Boolean(Astro.locals.user);
 							aria-label="System theme">System</button
 						>
 					</div>
+					<span class="built-tag">Built with <b>Claude Code</b><span class="built-sep" aria-hidden="true"></span><b>Opus 5.5</b></span>
 					<p class="footer-powered">
 						Powered by <a href="https://emdashcms.com">EmDash</a>
 					</p>
@@ -312,12 +310,6 @@ const isLoggedIn = Boolean(Astro.locals.user);
 		</style>
 
 		<style>
-			.built-with {
-				display: flex;
-				justify-content: center;
-				padding: 0.6rem 1rem 0;
-			}
-
 			/* a small coloured tag, not a link */
 			.built-tag {
 				display: inline-flex;
