@@ -624,7 +624,7 @@ const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
 		outline-offset: -2px;
 	}
 
-	/* Gear: 5 wireframes → 5 columns wide, featured first cell + 2 columns mid, 1 column on phones */
+	/* Gear: 6 wireframes → full rows at 3, 2 or 1 columns */
 	.gear-grid {
 		list-style: none;
 		grid-template-columns: minmax(0, 1fr);
@@ -634,19 +634,11 @@ const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
 		.gear-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
-
-		.gear-grid > .gear:first-child {
-			grid-column: span 2;
-		}
 	}
 
-	@media (min-width: 1100px) {
+	@media (min-width: 900px) {
 		.gear-grid {
-			grid-template-columns: repeat(5, minmax(0, 1fr));
-		}
-
-		.gear-grid > .gear:first-child {
-			grid-column: auto;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}
 
@@ -658,14 +650,14 @@ const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
 
 	/* same drawing height in every cell so captions line up */
 	.gear-figure {
-		height: 8.5rem;
-		display: grid;
-		place-items: center;
+		height: 9rem;
 		padding: var(--spacing-xs);
 	}
 
+	/* the SVG fills the box; preserveAspectRatio keeps every drawing inside it */
 	.gear-figure :global(svg) {
-		max-height: 100%;
+		width: 100%;
+		height: 100%;
 	}
 
 	.gear-text {

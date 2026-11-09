@@ -2,7 +2,7 @@
 // Isometric wireframe drawings of gear, in the same line style as the hero.
 // Geometry is generated at render time: x runs down-right, y (depth) up-right, z up.
 interface Props {
-	kind: "korg-x5" | "atari-st" | "delorean" | "yamaha-qx5" | "logi-lift";
+	kind: "korg-x5" | "atari-st" | "delorean" | "yamaha-qx5" | "logi-lift" | "boox-nova3";
 	label: string;
 }
 const { kind, label } = Astro.props;
@@ -123,35 +123,70 @@ if (kind === "atari-st") {
 }
 
 if (kind === "delorean") {
-	// DeLorean DMC-12 (1981): wedge body, louvred rear window, gull-wing doors up
-	const L = 12, Wd = 4.6;
-	box(0, 0, 0.7, L, Wd, 1.2); // lower body
-	// nose wedge (front at x = 0 is hidden; give the bonnet a slope on the top face)
-	line([0, 0, 1.9], [0, Wd, 1.9], "l s");
-	// cabin as a frustum: base x 3..9.2, roof x 4.6..7.6
-	const b0: V[] = [[3, 0.35, 1.9], [9.2, 0.35, 1.9], [9.2, Wd - 0.35, 1.9], [3, Wd - 0.35, 1.9]];
-	const t0: V[] = [[4.6, 0.7, 3.0], [7.6, 0.7, 3.0], [7.6, Wd - 0.7, 3.0], [4.6, Wd - 0.7, 3.0]];
-	poly([b0[0], b0[1], t0[1], t0[0]]); // side
-	poly([b0[1], b0[2], t0[2], t0[1]]); // rear slope
-	poly([t0[0], t0[1], t0[2], t0[3]]); // roof
-	poly([[3.5, 0.42, 2.05], [8.6, 0.42, 2.05], [7.45, 0.68, 2.85], [4.75, 0.68, 2.85]], "w s"); // side window
-	for (let i = 1; i < 6; i++) {
-		const f = i / 6;
-		line([9.2 - 1.6 * f, 0.35 + 0.35 * f, 1.9 + 1.1 * f], [9.2 - 1.6 * f, Wd - 0.35 - 0.35 * f, 1.9 + 1.1 * f]); // louvres
+	// DeLorean DMC-12 (1981): wedge nose, wheel arches, louvred rear, both gull-wing
+	// doors up, Mr. Fusion on the deck, OUTATIME plate and fire trails behind.
+	const L = 12.5, Wd = 4.8, zb = 0.6, zh = 1.35, zd = 1.95, xh = 2.9;
+	const wheels = [2.4, 10.1], r = 0.95, wz = 0.88;
+	const topZ = (x: number) => (x < xh ? zh + ((zd - zh) * x) / xh : zd);
+	// fire trails on the road (drawn first, the car covers them)
+	for (const y of [0.25, Wd - 0.25]) {
+		line([wheels[1], y, 0], [L + 3.6, y, 0], "l fire");
+		line([wheels[1] + 0.4, y + 0.18, 0], [L + 2.8, y + 0.18, 0], "l fire thin");
 	}
-	// gull-wing door, open
-	poly([[4.8, 0.7, 3.0], [7.4, 0.7, 3.0], [7.4, -0.9, 3.9], [4.8, -0.9, 3.9]], "w door");
-	poly([[5.1, 0.35, 3.18], [7.1, 0.35, 3.18], [7.1, -0.6, 3.72], [5.1, -0.6, 3.72]], "w s");
-	// rear: tail-light band and plate
-	poly([[L, 0.5, 1.5], [L, Wd - 0.5, 1.5], [L, Wd - 0.5, 1.75], [L, 0.5, 1.75]], "w s");
-	const o = P([L, 1.4, 1.25]);
+	// far gull-wing door (behind the roof)
+	const xa = 4.9, xb = 7.3;
+	poly([[xa, Wd - 0.95, 3.05], [xb, Wd - 0.95, 3.05], [xb, Wd + 0.5, 3.95], [xa, Wd + 0.5, 3.95]], "w s");
+	poly([[xa, Wd + 0.5, 3.95], [xb, Wd + 0.5, 3.95], [xb, Wd + 1.2, 3.05], [xa, Wd + 1.2, 3.05]], "w s");
+	// body: rear face, deck + hood, side with arches
+	poly([[L, 0, zb], [L, Wd, zb], [L, Wd, zd], [L, 0, zd]]);
+	poly([[0, 0, zh], [xh, 0, zd], [xh, Wd, zd], [0, Wd, zh]]); // hood
+	poly([[xh, 0, zd], [L, 0, zd], [L, Wd, zd], [xh, Wd, zd]]); // deck
+	const side: V[] = [[0, 0, zb], [0, 0, zh], [xh, 0, zd], [L, 0, zd], [L, 0, zb]];
+	for (const cx of [...wheels].reverse()) {
+		for (let k = 0; k <= 12; k++) {
+			const a = (k / 12) * Math.PI;
+			side.push([cx + (r + 0.18) * Math.cos(a), 0, wz + (r + 0.18) * Math.sin(a) * 0.95]);
+		}
+	}
+	poly(side);
+	line([0.3, 0, 1.18], [L - 0.2, 0, 1.18], "l s"); // the DMC crease
+	line([0.2, 0, 0.72], [L - 0.2, 0, 0.72], "l s"); // rocker
+	// cabin: windshield, roof, louvred rear slope
+	const cb = { xf: 3.3, xr: 10.4, xrf: 5.0, xrr: 7.4, yi: 0.45, yr: 0.95, zr: 3.05 };
+	poly([[cb.xf, cb.yi, zd], [cb.xr, cb.yi, zd], [cb.xrr, cb.yr, cb.zr], [cb.xrf, cb.yr, cb.zr]]); // near side
+	poly([[cb.xr, cb.yi, zd], [cb.xr, Wd - cb.yi, zd], [cb.xrr, Wd - cb.yr, cb.zr], [cb.xrr, cb.yr, cb.zr]]); // rear slope
+	poly([[cb.xrf, cb.yr, cb.zr], [cb.xrr, cb.yr, cb.zr], [cb.xrr, Wd - cb.yr, cb.zr], [cb.xrf, Wd - cb.yr, cb.zr]]); // roof
+	for (let i = 1; i <= 7; i++) {
+		const f = i / 8;
+		const x = cb.xr + (cb.xrr - cb.xr) * f, z = zd + (cb.zr - zd) * f, y = cb.yi + (cb.yr - cb.yi) * f;
+		line([x, y + 0.2, z], [x, Wd - y - 0.2, z], "l s"); // louvres
+	}
+	// near gull-wing door, open like a wing
+	poly([[xa, cb.yr, cb.zr], [xb, cb.yr, cb.zr], [xb, -0.55, 3.95], [xa, -0.55, 3.95]], "w door");
+	poly([[xa + 0.25, cb.yr - 0.15, cb.zr + 0.08], [xb - 0.25, cb.yr - 0.15, cb.zr + 0.08], [xb - 0.25, -0.3, 3.8], [xa + 0.25, -0.3, 3.8]], "w s");
+	poly([[xa, -0.55, 3.95], [xb, -0.55, 3.95], [xb, -1.25, 3.05], [xa, -1.25, 3.05]], "w door");
+	// Mr. Fusion on the rear deck
+	box(L - 1.45, Wd / 2 - 0.3, zd, 0.6, 0.6, 0.55, "w", "w k");
+	line([L - 1.15, Wd / 2, zd + 0.55], [L - 1.15, Wd / 2, zd + 0.85], "l");
+	// rear: tail-light grilles + plate
+	for (const [y0, y1] of [[0.35, 1.55], [Wd - 1.55, Wd - 0.35]]) {
+		poly([[L, y0, 1.45], [L, y1, 1.45], [L, y1, 1.75], [L, y0, 1.75]], "w s");
+		for (let k = 1; k < 5; k++) line([L, y0 + ((y1 - y0) * k) / 5, 1.45], [L, y0 + ((y1 - y0) * k) / 5, 1.75], "l s");
+	}
+	poly([[L, 1.75, 0.75], [L, Wd - 1.75, 0.75], [L, Wd - 1.75, 1.25], [L, 1.75, 1.25]], "w s");
+	const o = P([L, 1.85, 0.88]);
 	all.push(o);
-	out.push(`<text class="t acc" font-size="0.42" transform="matrix(${(C * U).toFixed(2)},${(-0.5 * U).toFixed(2)},0,${U},${o[0].toFixed(1)},${o[1].toFixed(1)})">OUTATIME</text>`);
-	line([2.2, 0, 1.3], [9.8, 0, 1.3], "l s"); // body crease
-	wheel(2.6, -0.05, 0.85, 0.85);
-	wheel(9.6, -0.05, 0.85, 0.85);
-	// flux of the time circuits: two sparks off the rear
-	for (const [dx, dz] of [[1.2, 0.4], [1.8, 1.1]]) line([L + 0.3, 1.2, 0.6 + dz], [L + 0.3 + dx, 1.2, 0.3 + dz], "l acc-l");
+	out.push(`<text class="t acc" font-size="0.36" transform="matrix(${(C * U).toFixed(2)},${(-0.5 * U).toFixed(2)},0,${U},${o[0].toFixed(1)},${o[1].toFixed(1)})">OUTATIME</text>`);
+	// wheels with spokes
+	for (const cx of wheels) {
+		wheel(cx, -0.06, wz, r);
+		for (let k = 0; k < 5; k++) {
+			const a = (k / 5) * Math.PI * 2 + 0.3;
+			line([cx + 0.18 * Math.cos(a), -0.08, wz + 0.18 * Math.sin(a)], [cx + 0.5 * Math.cos(a), -0.08, wz + 0.5 * Math.sin(a)], "l s");
+		}
+	}
+	// flux sparks off the rear
+	for (const [dy, dz] of [[0.6, 0.0], [1.6, 0.35], [2.6, 0.1]]) line([L, dy + 0.4, zd], [L + 0.9, dy + 0.1, zd + 0.7 + dz], "l acc-l");
 }
 
 if (kind === "yamaha-qx5") {
@@ -181,31 +216,67 @@ if (kind === "yamaha-qx5") {
 }
 
 if (kind === "logi-lift") {
-	// Logitech Lift (2022): vertical ergonomic mouse — contoured grip drawn as surface contours
-	const L = 6, N = 40;
-	const bell = (s: number) => Math.pow(Math.sin(Math.PI * s), 0.75);
-	const front = (s: number): V => [L * s, 1.9 - 1.8 * bell(s), 0];
-	const back = (s: number): V => [L * s, 2.1 + 1.6 * bell(s), 0];
-	const ridge = (s: number): V => [L * s, 2.9, 2.7 * Math.pow(Math.sin(Math.PI * Math.min(1, s * 1.08)), 0.55) * (0.75 + 0.25 * s)];
-	const lerp = (a: V, b: V, k: number): V => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
-	// bulge the grip outward a little between footprint and ridge
-	const surf = (s: number, k: number): V => {
-		const p = lerp(front(s), ridge(s), k);
-		return [p[0], p[1] - 0.6 * Math.sin(Math.PI * k) * bell(s), p[2]];
+	// Logitech Lift (2022), vertical ergonomic mouse, drawn as a wireframe mesh:
+	// a height field over an egg-shaped footprint, ridge close to the button side,
+	// long rounded palm slope on the other. Quads are painted back to front.
+	const L = 7.2, Wm = 4.4, NU = 18, NV = 12;
+	const half = (u: number) => 0.5 * Wm * Math.pow(Math.sin(Math.PI * u), 0.62) * (0.72 + 0.28 * u); // egg
+	const lift = (u: number) => 3.6 * Math.exp(-(((u - 0.4) / 0.4) ** 2)); // tallest a bit ahead of centre
+	const g = (v: number) => {
+		// v ∈ [-1, 1] across the footprint; peak at v = -0.45, steep toward -1
+		const p = -0.45;
+		return v < p ? Math.sqrt(Math.max(0, 1 - ((v - p) / (1 + p)) ** 2)) : Math.cos(((v - p) / (1 - p)) * (Math.PI / 2)) ** 1.15;
 	};
-	const S = (f: (s: number) => V) => Array.from({ length: N + 1 }, (_, i) => f(i / N));
-	poly([...S(back), ...S(ridge).reverse()], "w s"); // back side
-	poly([...S((s) => surf(s, 0)), ...S((s) => surf(1 - s, 1))]); // grip face
-	for (let k = 1; k < 7; k++) {
-		const pts = S((s) => surf(s, k / 7)).map(pt).join(" ");
-		out.push(`<polyline class="l s" points="${pts}"/>`);
+	const at = (u: number, v: number): V => {
+		const y = Wm / 2 + v * half(u);
+		return [L * u, y, lift(u) * g(v) * Math.pow(Math.sin(Math.PI * u), 0.35)];
+	};
+	const quads: { vs: V[]; d: number }[] = [];
+	for (let i = 0; i < NU; i++)
+		for (let j = 0; j < NV; j++) {
+			const [u0, u1] = [i / NU, (i + 1) / NU];
+			const [v0, v1] = [-1 + (2 * j) / NV, -1 + (2 * (j + 1)) / NV];
+			const vs = [at(u0, v0), at(u1, v0), at(u1, v1), at(u0, v1)];
+			const c = vs.reduce((m, p) => [m[0] + p[0] / 4, m[1] + p[1] / 4, m[2] + p[2] / 4] as V, [0, 0, 0] as V);
+			quads.push({ vs, d: c[0] - c[1] + 0.6 * c[2] }); // larger = closer to the viewer
+		}
+	quads.sort((a, b) => a.d - b.d);
+	for (const q of quads) poly(q.vs, "w mesh");
+	// buttons: split along the ridge front, scroll wheel on top
+	const ridgeV = -0.45;
+	out.push(`<polyline class="l" points="${Array.from({ length: 11 }, (_, k) => at(0.08 + k * 0.03, ridgeV + 0.18)).map(pt).join(" ")}"/>`);
+	const c = at(0.3, ridgeV);
+	const wh: V[] = [];
+	for (let j = 0; j < 20; j++) {
+		const a = (j / 20) * Math.PI * 2;
+		wh.push([c[0] + 0.34 * Math.cos(a), c[1], c[2] + 0.05 + 0.3 * Math.sin(a)]);
 	}
-	// buttons near the top of the grip, scroll wheel on the ridge
-	out.push(`<polyline class="l" points="${S((s) => surf(0.18 + s * 0.62, 0.76)).map(pt).join(" ")}"/>`);
-	line(surf(0.5, 0.76), surf(0.5, 1), "l");
-	const w0 = surf(0.42, 0.97), w1 = surf(0.58, 0.97);
-	poly([w0, w1, [w1[0], w1[1] + 0.35, w1[2] + 0.25], [w0[0], w0[1] + 0.35, w0[2] + 0.25]], "w acc-w");
-	text("logi", [L * 0.36, 0.55, 0.75], 0.4, "front", "t");
+	poly(wh, "w acc-w");
+	text("logi", [L * 0.48, at(0.48, -1)[1] - 0.05, 1.0], 0.45, "front", "t");
+}
+
+if (kind === "boox-nova3") {
+	// Onyx Boox Nova3 Color (2021): 7.8" colour e-ink tablet lying flat, with its stylus
+	const W = 6.6, D = 9, H = 0.25;
+	box(0, 0, 0, W, D, H);
+	const [x0, x1, y0, y1] = [0.45, W - 0.45, 1.05, D - 0.45];
+	poly([[x0, y0, H], [x1, y0, H], [x1, y1, H], [x0, y1, H]], "w s"); // screen
+	// the cover art: a quilt of squares with a big X, a few tiles tinted (colour e-ink)
+	const cols = 5, rows = 7, cw = (x1 - x0) / cols, rh = (y1 - 0.9 - y0) / rows;
+	for (let r = 0; r < rows; r++)
+		for (let c = 0; c < cols; c++) {
+			if ((r + c) % 3 !== 0) continue;
+			const [a, b] = [x0 + c * cw, y0 + r * rh];
+			poly([[a, b, H], [a + cw, b, H], [a + cw, b + rh, H], [a, b + rh, H]], (r * cols + c) % 2 ? "w tint" : "w s");
+		}
+	line([x0, y0, H], [x1, y1 - 0.9, H], "l acc-l");
+	line([x1, y0, H], [x0, y1 - 0.9, H], "l acc-l");
+	text("BOOX", [W / 2 - 0.55, y1 - 0.3, H], 0.42, "top", "t b");
+	poly([[W / 2 - 0.5, 0.35, H], [W / 2 + 0.5, 0.35, H], [W / 2 + 0.5, 0.6, H], [W / 2 - 0.5, 0.6, H]], "w s"); // home button
+	// stylus beside it
+	box(W + 0.7, 1.2, 0, 0.32, 6.6, 0.32, "w", "w k");
+	line([W + 0.86, 1.2, 0.16], [W + 0.86, 0.6, 0.16], "l");
+	line([W + 0.7, 6.2, 0.32], [W + 1.02, 6.2, 0.32], "l");
 }
 
 const xs = all.map((p) => p[0]), ys = all.map((p) => p[1]);
@@ -263,6 +334,32 @@ const vb = [Math.min(...xs) - pad, Math.min(...ys) - pad, Math.max(...xs) - Math
 	.gear-art :global(.lcd) {
 		fill: color-mix(in srgb, var(--color-brand) 10%, var(--color-bg));
 		stroke: var(--color-brand);
+	}
+
+	.gear-art :global(.mesh) {
+		stroke-opacity: 0.75;
+	}
+
+	.gear-art :global(.fire) {
+		stroke: var(--color-brand);
+		stroke-opacity: 0.8;
+		stroke-dasharray: 6 4;
+	}
+
+	.gear-art :global(.fire.thin) {
+		stroke-opacity: 0.45;
+		stroke-dasharray: 3 5;
+	}
+
+	.gear-art :global(.ghost) {
+		fill: none;
+		stroke-opacity: 0.3;
+		stroke-dasharray: 2 3;
+	}
+
+	.gear-art :global(.tint) {
+		fill: color-mix(in srgb, var(--color-brand) 14%, var(--color-bg));
+		stroke-opacity: 0.6;
 	}
 
 	.gear-art :global(.acc-w) {
