@@ -18,12 +18,6 @@
 			"id": "bf869b2be6c84f3eb05c5a6a6cdd62c9",
 		},
 	],
-	"r2_buckets": [
-		{
-			"binding": "MEDIA",
-			"bucket_name": "selenium79-media",
-		},
-	],
 	// Sandboxed plugins require Worker Loader, available on Workers paid plans. Uncomment to enable:
 	// "worker_loaders": [{ "binding": "LOADER" }],
 	// General maintenance cron trigger

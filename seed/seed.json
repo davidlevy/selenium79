@@ -94,6 +94,11 @@
 					"slug": "video",
 					"label": "Video URL (YouTube)",
 					"type": "string"
+				},
+				{
+					"slug": "cover",
+					"label": "Cover image path (e.g. /projects/name.webp)",
+					"type": "string"
 				}
 			]
 		},
@@ -355,7 +360,8 @@
 							]
 						}
 					],
-					"url": "https://milontech.vercel.app/"
+					"url": "https://milontech.vercel.app/",
+					"cover": "/projects/milon-tech.webp"
 				}
 			},
 			{
@@ -380,7 +386,8 @@
 							]
 						}
 					],
-					"url": "https://soundtrust.live"
+					"url": "https://soundtrust.live",
+					"cover": "/projects/soundtrust.webp"
 				}
 			},
 			{
