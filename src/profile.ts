@@ -19,4 +19,16 @@ export const profile = {
 		"Claude Code · MCP",
 		"Tech hiring & mentoring",
 	],
+	education: [
+		{ title: "Computer Science Engineer", school: "IMAC Engineering School, Paris", year: "2002" },
+		{ title: "Classes préparatoires PSI*", school: "Lycée Jean-Baptiste Say, Paris", year: "1999" },
+	],
+	languages: [
+		{ name: "French", level: "Native" },
+		{ name: "English", level: "Fluent" },
+		{ name: "Hebrew", level: "Fluent" },
+		{ name: "Spanish", level: "Elementary" },
+		{ name: "Russian", level: "Elementary" },
+	],
+	beyondCode: ["Piano — improvisation & composition", "Ecology, sustainability & low-tech", "UI/UX and industrial design"],
 };

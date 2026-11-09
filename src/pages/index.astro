@@ -134,6 +134,41 @@ const github = settings?.social?.github;
 				</ul>
 			</aside>
 		</div>
+		<div class="cells facts">
+			<div class="fact">
+				<p class="mono fact-label">Education</p>
+				<ul>
+					{profile.education.map((e) => (
+						<li>
+							<span class="fact-main">{e.title}</span>
+							<span class="fact-sub">{e.school}</span>
+							<span class="fact-meta mono">{e.year}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+			<div class="fact">
+				<p class="mono fact-label">Languages</p>
+				<ul class="langs">
+					{profile.languages.map((l) => (
+						<li>
+							<span class="fact-main">{l.name}</span>
+							<span class="fact-meta mono">{l.level}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+			<div class="fact">
+				<p class="mono fact-label">Beyond code</p>
+				<ul>
+					{profile.beyondCode.map((b) => (
+						<li>
+							<span class="fact-main">{b}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
 	</section>
 
 	<section id="music" class="wrap section">
@@ -475,6 +510,62 @@ const github = settings?.social?.github;
 		font-size: var(--font-size-lg);
 		font-weight: 500;
 		margin: 1.8em 0 0.5em;
+	}
+
+	.facts {
+		margin-top: var(--spacing-2xl);
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+	}
+
+	.fact ul {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.fact-label {
+		margin-bottom: var(--spacing-md);
+		color: var(--color-brand);
+	}
+
+	.fact li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+	}
+
+	.fact .langs li {
+		flex-direction: row;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--spacing-md);
+		padding-bottom: var(--spacing-sm);
+		border-bottom: 1px dashed var(--color-border);
+	}
+
+	.fact .langs {
+		gap: var(--spacing-sm);
+	}
+
+	.fact .langs li:last-child {
+		border-bottom: 0;
+	}
+
+	.fact-main {
+		font-size: var(--font-size-sm);
+		font-weight: 500;
+	}
+
+	.fact-sub {
+		font-size: var(--font-size-sm);
+		color: var(--color-muted);
+	}
+
+	.fact-meta {
+		font-size: 0.64rem;
+		text-transform: none;
+		letter-spacing: 0.04em;
 	}
 
 	.about-label {
