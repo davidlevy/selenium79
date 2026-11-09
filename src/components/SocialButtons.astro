@@ -2,10 +2,11 @@
 interface Props {
 	linkedin?: string;
 	github?: string;
+	twitter?: string;
 	email?: string;
 	center?: boolean;
 }
-const { linkedin, github, email, center } = Astro.props;
+const { linkedin, github, twitter, email, center } = Astro.props;
 ---
 
 <div class:list={["social", { center }]}>
@@ -32,6 +33,19 @@ const { linkedin, github, email, center } = Astro.props;
 					/>
 				</svg>
 				GitHub
+			</a>
+		)
+	}
+	{
+		twitter && (
+			<a class="sbtn sbtn-x" href={twitter} target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						fill="currentColor"
+						d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.59-6.64 7.59H.47l8.6-9.83L0 1.15h7.59l5.24 6.93zM17.61 20.64h2.04L6.49 3.24H4.3z"
+					/>
+				</svg>
+				<span class="sbtn-x-text">@{twitter.replace(/^https?:\/\/(www\.)?(x|twitter)\.com\//, "").replace(/\/$/, "")}</span>
 			</a>
 		)
 	}
@@ -101,6 +115,17 @@ const { linkedin, github, email, center } = Astro.props;
 	.sbtn-github {
 		background: light-dark(#1f2328, #eef1f5);
 		color: light-dark(#fff, #1f2328);
+	}
+
+	.sbtn-x {
+		background: #000;
+		color: #fff;
+		border-color: rgb(255 255 255 / 0.16);
+	}
+
+	.sbtn-x svg {
+		width: 0.9rem;
+		height: 0.9rem;
 	}
 
 	.sbtn-mail {

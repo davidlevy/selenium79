@@ -31,6 +31,12 @@ export const profile = {
 		{ name: "Spanish", level: "Elementary" },
 		{ name: "Russian", level: "Elementary" },
 	],
-	beyondCode: ["Piano — improvisation & composition", "Ecology, sustainability & low-tech", "UI/UX and industrial design"],
+	beyondCode: [
+		{ label: "Piano — improvisation & composition", icon: "piano" },
+		{ label: "Ecology, sustainability & low-tech", icon: "leaf" },
+		{ label: "UI/UX and industrial design", icon: "design" },
+		{ label: "Back to the Future — 1.21 gigawatts", icon: "timetravel" },
+		{ label: "Coldplay — a sky full of stars", icon: "stars" },
+	],
 	community: { name: "Agentic Israel", url: "https://www.agenticisrael.com/", blurb: "Israel's English-speaking community for people building with AI" },
 };
