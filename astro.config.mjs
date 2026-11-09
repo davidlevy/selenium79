@@ -14,6 +14,8 @@ export default defineConfig({
 	integrations: [
 		react(),
 		emdash({
+			// Canonical public origin: links and the passkey rpId are bound to it.
+			siteUrl: "https://me.selenium79.workers.dev",
 			database: d1({ binding: "DB", session: "auto", coalesce: true }),
 		}),
 	],
