@@ -2,7 +2,7 @@
 // Isometric wireframe drawings of gear, in the same line style as the hero.
 // Geometry is generated at render time: x runs down-right, y (depth) up-right, z up.
 interface Props {
-	kind: "korg-x5" | "atari-st" | "delorean" | "yamaha-qx5" | "logi-lift" | "boox-nova3";
+	kind: "korg-x5" | "atari-st" | "delorean" | "yamaha-qx5" | "3m-mouse" | "boox-nova3";
 	label: string;
 }
 const { kind, label } = Astro.props;
@@ -215,44 +215,107 @@ if (kind === "yamaha-qx5") {
 	out.push(`<path class="l s" d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${(a[0] + 30).toFixed(1)},${(a[1] + 5).toFixed(1)} ${(b[0] - 10).toFixed(1)},${(b[1] - 30).toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}"/>`);
 }
 
-if (kind === "logi-lift") {
-	// Logitech Lift (2022), vertical ergonomic mouse, drawn as a wireframe mesh:
-	// a height field over an egg-shaped footprint, ridge close to the button side,
-	// long rounded palm slope on the other. Quads are painted back to front.
-	const L = 7.2, Wm = 4.4, NU = 18, NV = 12;
-	const half = (u: number) => 0.5 * Wm * Math.pow(Math.sin(Math.PI * u), 0.62) * (0.72 + 0.28 * u); // egg
-	const lift = (u: number) => 3.6 * Math.exp(-(((u - 0.4) / 0.4) ** 2)); // tallest a bit ahead of centre
-	const g = (v: number) => {
-		// v ∈ [-1, 1] across the footprint; peak at v = -0.45, steep toward -1
-		const p = -0.45;
-		return v < p ? Math.sqrt(Math.max(0, 1 - ((v - p) / (1 + p)) ** 2)) : Math.cos(((v - p) / (1 - p)) * (Math.PI / 2)) ** 1.15;
-	};
-	const at = (u: number, v: number): V => {
-		const y = Wm / 2 + v * half(u);
-		return [L * u, y, lift(u) * g(v) * Math.pow(Math.sin(Math.PI * u), 0.35)];
-	};
-	const quads: { vs: V[]; d: number }[] = [];
-	for (let i = 0; i < NU; i++)
-		for (let j = 0; j < NV; j++) {
-			const [u0, u1] = [i / NU, (i + 1) / NU];
-			const [v0, v1] = [-1 + (2 * j) / NV, -1 + (2 * (j + 1)) / NV];
-			const vs = [at(u0, v0), at(u1, v0), at(u1, v1), at(u0, v1)];
-			const c = vs.reduce((m, p) => [m[0] + p[0] / 4, m[1] + p[1] / 4, m[2] + p[2] / 4] as V, [0, 0, 0] as V);
-			quads.push({ vs, d: c[0] - c[1] + 0.6 * c[2] }); // larger = closer to the viewer
-		}
-	quads.sort((a, b) => a.d - b.d);
-	for (const q of quads) poly(q.vs, "w mesh");
-	// buttons: split along the ridge front, scroll wheel on top
-	const ridgeV = -0.45;
-	out.push(`<polyline class="l" points="${Array.from({ length: 11 }, (_, k) => at(0.08 + k * 0.03, ridgeV + 0.18)).map(pt).join(" ")}"/>`);
-	const c = at(0.3, ridgeV);
-	const wh: V[] = [];
-	for (let j = 0; j < 20; j++) {
-		const a = (j / 20) * Math.PI * 2;
-		wh.push([c[0] + 0.34 * Math.cos(a), c[1], c[2] + 0.05 + 0.3 * Math.sin(a)]);
+if (kind === "3m-mouse") {
+	// 3M Ergonomic Mouse: a joystick-style vertical mouse. Rounded base, a tilted
+	// handle drawn as a solid of revolution (rings + silhouettes), buttons on top,
+	// coiled cable ending in a USB plug.
+	const cx = 3.2, cy = 3.0, bz = 0.55;
+	// base: superellipse footprint extruded; bottom first, top over it
+	const base = (z: number, grow = 0): V[] =>
+		Array.from({ length: 48 }, (_, i) => {
+			const a = (i / 48) * Math.PI * 2;
+			const c = Math.cos(a), sn = Math.sin(a);
+			const rx = 2.9 + grow, ry = 2.5 + grow;
+			return [cx + rx * Math.sign(c) * Math.abs(c) ** 0.7, cy + ry * Math.sign(sn) * Math.abs(sn) ** 0.7, z] as V;
+		});
+	// cable first (behind everything): coil + plug
+	const coil: string[] = [];
+	for (let k = 0; k < 3; k++) {
+		const ring: V[] = Array.from({ length: 30 }, (_, i) => {
+			const a = (i / 30) * Math.PI * 2;
+			return [6.6 + 0.9 * Math.cos(a) + k * 0.15, 6.3 + 0.55 * Math.sin(a) + k * 0.1, 0.05] as V;
+		});
+		coil.push(`<polygon class="l s" points="${ring.map(pt).join(" ")}" fill="none"/>`);
 	}
+	out.push(...coil);
+	const c0 = P([cx + 0.6, cy + 2.4, 0.3]), c1 = P([6.2, 6.0, 0.05]);
+	all.push(c0, c1);
+	out.push(`<path class="l s" d="M${c0[0].toFixed(1)},${c0[1].toFixed(1)} C${(c0[0] + 20).toFixed(1)},${(c0[1] - 12).toFixed(1)} ${(c1[0] - 25).toFixed(1)},${(c1[1] + 6).toFixed(1)} ${c1[0].toFixed(1)},${c1[1].toFixed(1)}"/>`);
+	line([7.6, 6.3, 0.05], [8.9, 5.2, 0.05], "l s");
+	box(8.9, 4.4, 0, 1.0, 0.7, 0.35, "w"); // USB plug
+	box(9.9, 4.55, 0.07, 0.55, 0.4, 0.2, "w s");
+	poly(base(0, 0.05), "w");
+	poly(base(bz), "w");
+	{
+		const top = base(bz).map(P), bot = base(0, 0.05).map(P);
+		const iMin = top.reduce((m, p, i) => (p[0] < top[m][0] ? i : m), 0);
+		const iMax = top.reduce((m, p, i) => (p[0] > top[m][0] ? i : m), 0);
+		for (const i of [iMin, iMax]) {
+			all.push(top[i], bot[i]);
+			out.push(`<line class="l" x1="${top[i][0].toFixed(1)}" y1="${top[i][1].toFixed(1)}" x2="${bot[i][0].toFixed(1)}" y2="${bot[i][1].toFixed(1)}"/>`);
+		}
+	}
+	// handle: axis leans forward (−x) as it rises; radius profile with a flared foot and a bulb
+	const H = 5.4, steps = 28;
+	const axis = (t: number): V => [cx - 0.2 - 0.9 * t * t, cy + 0.15 * t, bz + H * t];
+	const rad = (t: number) => {
+		const foot = 1.05 * Math.exp(-((t / 0.09) ** 2));
+		const bulb = 0.28 * Math.exp(-(((t - 0.78) / 0.14) ** 2));
+		const cap = t > 0.9 ? Math.sqrt(Math.max(0, 1 - ((t - 0.9) / 0.1) ** 2)) : 1;
+		return (0.55 + foot + bulb) * cap;
+	};
+	const ring = (t: number): V[] => {
+		const a0 = axis(t), r = rad(t);
+		return Array.from({ length: 36 }, (_, i) => {
+			const a = (i / 36) * Math.PI * 2;
+			return [a0[0] + r * Math.cos(a), a0[1] + r * Math.sin(a), a0[2]] as V;
+		});
+	};
+	const left: [number, number][] = [], right: [number, number][] = [];
+	for (let k = 0; k <= steps; k++) {
+		const pts = ring(k / steps).map(P);
+		let l = pts[0], r = pts[0];
+		for (const q of pts) {
+			if (q[0] < l[0]) l = q;
+			if (q[0] > r[0]) r = q;
+		}
+		left.push(l);
+		right.push(r);
+	}
+	// close the outline along the front half of the foot ring (not a straight chord)
+	const footC = P(axis(0));
+	const footFront = ring(0).map(P).filter((q) => q[1] >= footC[1]).sort((a, b) => b[0] - a[0]);
+	const sil = [...left, ...right.reverse(), ...footFront];
+	all.push(...sil);
+	out.push(`<polygon class="w" points="${sil.map((q) => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(" ")}"/>`);
+	// a few cross-section rings (front halves only) give the volume
+	for (const t of [0.12, 0.3, 0.48, 0.64, 0.8]) {
+		const pts = ring(t);
+		const c = P(axis(t));
+		const front = pts.map(P).filter((q) => q[1] >= c[1]);
+		out.push(`<polyline class="l s" points="${front.sort((a, b) => a[0] - b[0]).map((q) => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(" ")}"/>`);
+	}
+	// two buttons on the surface of the bulb, facing the viewer
+	const patch = (t0: number, t1: number, a0: number, a1: number): V[] => {
+		const arc = (t: number, rev: boolean) => {
+			const ax = axis(t), r = rad(t) + 0.02;
+			const pts = Array.from({ length: 8 }, (_, i) => {
+				const a = ((a0 + ((a1 - a0) * i) / 7) * Math.PI) / 180;
+				return [ax[0] + r * Math.cos(a), ax[1] + r * Math.sin(a), ax[2]] as V;
+			});
+			return rev ? pts.reverse() : pts;
+		};
+		return [...arc(t0, false), ...arc(t1, true)];
+	};
+	poly(patch(0.7, 0.77, 215, 275), "w s");
+	poly(patch(0.79, 0.86, 215, 275), "w s");
+	const tw = axis(0.93);
+	const wh: V[] = Array.from({ length: 20 }, (_, i) => {
+		const a = (i / 20) * Math.PI * 2;
+		return [tw[0] - 0.3 + 0.32 * Math.cos(a), tw[1], tw[2] + 0.28 * Math.sin(a)] as V;
+	});
 	poly(wh, "w acc-w");
-	text("logi", [L * 0.48, at(0.48, -1)[1] - 0.05, 1.0], 0.45, "front", "t");
+	text("3M", [cx + 0.3, cy - 2.05, bz], 0.65, "top", "t b");
 }
 
 if (kind === "boox-nova3") {
