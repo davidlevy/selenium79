@@ -503,7 +503,9 @@ import Arrow from "./Arrow.astro";
 		let t = 0; // morph 0 = piano, 1 = mac
 		let target = 0;
 		let hover: number | null = null;
-		let autoPhase = 0;
+		// Cycle: 7s piano · 2s morph · 7s keyboard · 2s back. Start 1.5s before the
+		// first morph so visitors see the transformation right after load.
+		let autoPhase = 5.5;
 		let visible = true;
 		let notesPlayed = 0;
 		let bytesOut = 0;
@@ -677,10 +679,48 @@ import Arrow from "./Arrow.astro";
 		} else if (reduced) setMode(0);
 
 		// ── Autoplay scripts ──────────────────────────────────────────
-		// Am – F – C – G arpeggios, played gently.
-		const melody = [57, 60, 64, 69, 64, 60, 53, 57, 60, 65, 60, 57, 48, 52, 55, 60, 55, 52, 55, 59, 62, 67, 71, 67];
+		// An original 16-bar piece for two hands (A minor → C major and back),
+		// written for this 2-octave keyboard (C3–B4). Each bar: right-hand melody as
+		// [midi, eighths] pairs (0 = rest) and left-hand [midi, eighth offset] notes.
+		const N: Record<string, number> = { C3: 48, D3: 50, E3: 52, F3: 53, G3: 55, A3: 57, B3: 59, C4: 60, D4: 62, E4: 64, F4: 65, G4: 67, "G#4": 68, A4: 69, B4: 71 };
+		type Bar = [rh: [string, number][], lh: [string, number][]];
+		const bars: Bar[] = [
+			// A — Am | F | C | G
+			[[["E4", 2], ["A4", 2], ["B4", 1], ["A4", 1], ["E4", 2]], [["A3", 0], ["E3", 4]]],
+			[[["A4", 3], ["G4", 1], ["F4", 2], ["E4", 2]], [["F3", 0], ["C3", 4]]],
+			[[["G4", 3], ["E4", 1], ["C4", 2], ["D4", 2]], [["C3", 0], ["G3", 4]]],
+			[[["D4", 3], ["E4", 1], ["D4", 2], ["B3", 2]], [["G3", 0], ["D3", 4]]],
+			// B — Am | Dm | E | Am
+			[[["E4", 2], ["A4", 2], ["B4", 2], ["A4", 1], ["B4", 1]], [["A3", 0], ["E3", 4]]],
+			[[["A4", 3], ["F4", 1], ["D4", 2], ["F4", 2]], [["D3", 0], ["A3", 4]]],
+			[[["E4", 4], ["G#4", 2], ["B4", 2]], [["E3", 0], ["B3", 4]]],
+			[[["A4", 6], ["0", 2]], [["A3", 0], ["E3", 4]]],
+			// C — F | G | Em | Am (the lift)
+			[[["F4", 2], ["A4", 2], ["G4", 1], ["F4", 1], ["E4", 2]], [["F3", 0], ["C3", 4]]],
+			[[["D4", 2], ["G4", 2], ["B4", 3], ["A4", 1]], [["G3", 0], ["D3", 4]]],
+			[[["G4", 3], ["E4", 1], ["B4", 2], ["G4", 2]], [["E3", 0], ["B3", 4]]],
+			[[["A4", 4], ["E4", 2], ["C4", 2]], [["A3", 0], ["E3", 4]]],
+			// D — Dm | G | C | E (turnaround)
+			[[["D4", 2], ["F4", 2], ["A4", 3], ["G4", 1]], [["D3", 0], ["A3", 4]]],
+			[[["G4", 2], ["B4", 2], ["A4", 1], ["G4", 1], ["F4", 2]], [["G3", 0], ["D3", 4]]],
+			[[["E4", 2], ["G4", 2], ["C4", 4]], [["C3", 0], ["G3", 4]]],
+			[[["B3", 2], ["E4", 2], ["G#4", 2], ["B4", 2]], [["E3", 0], ["B3", 4]]],
+		];
+		// Flatten to one step per eighth note: which keys to strike, and for how long.
+		const score: { midi: number; len: number }[][] = [];
+		bars.forEach(([rh, lh], b) => {
+			const base = b * 8;
+			for (let i = 0; i < 8; i++) score[base + i] = [];
+			let pos = 0;
+			for (const [name, len] of rh) {
+				if (N[name]) score[base + pos].push({ midi: N[name], len });
+				pos += len;
+			}
+			for (const [name, at] of lh) score[base + at].push({ midi: N[name], len: 4 });
+		});
+		const EIGHTH = 250; // ms
 		const phrases = ["hello, world", "keys -> bytes -> notes", "import music from 'piano'", "tokens: 1,024 / 128k", "def play(k): return bytes(k)"];
-		let melodyI = 0;
+		let scoreI = 0;
 		let phraseI = 0;
 		let charI = 0;
 		let nextAuto = 0;
@@ -688,9 +728,11 @@ import Arrow from "./Arrow.astro";
 		function autoStep(now: number) {
 			if (reduced || now - lastHuman < 2500 || now < nextAuto) return;
 			if (t < 0.12) {
-				const pi = pianoByMidi.get(melody[melodyI++ % melody.length]);
-				if (pi !== undefined) pressPiano(pi, 220);
-				nextAuto = now + 300;
+				for (const n of score[scoreI++ % score.length]) {
+					const pi = pianoByMidi.get(n.midi);
+					if (pi !== undefined) pressPiano(pi, n.len * EIGHTH * 0.85);
+				}
+				nextAuto = now + EIGHTH;
 			} else if (t > 0.88) {
 				const phrase = phrases[phraseI % phrases.length];
 				if (charI === 0) typed = "";

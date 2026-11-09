@@ -6,6 +6,7 @@ import ProjectCard from "../components/ProjectCard.astro";
 import HeroKeys from "../components/HeroKeys.astro";
 import SocialButtons from "../components/SocialButtons.astro";
 import Arrow from "../components/Arrow.astro";
+import MusicGrid from "../components/MusicGrid.astro";
 import { profile } from "../profile";
 
 const [settings, projectsResult, experienceResult, aboutResult, musicResult] = await Promise.all([
@@ -127,7 +128,7 @@ const github = settings?.social?.github;
 				{about?.data.content && <PortableText value={about.data.content} />}
 			</div>
 			<aside>
-				<p class="mono about-label">Toolkit</p>
+				<p class="mono about-label">Skills</p>
 				<ul class="skills">
 					{profile.skills.map((s) => <li>{s}</li>)}
 				</ul>
@@ -145,21 +146,9 @@ const github = settings?.social?.github;
 				SoundCloud <Arrow />
 			</a>
 		</header>
-		<ol class="tracklist">
-			{tracks.map((t, i) => (
-				<li>
-					<a class="track" href={t.data.video} target="_blank" rel="noopener noreferrer">
-						<span class="track-n mono">{String(i + 1).padStart(2, "0")}</span>
-						<span class="track-text">
-							<span class="track-title" {...t.edit.title}>{t.data.title}</span>
-							{t.data.note && <span class="track-note mono">{t.data.note}</span>}
-						</span>
-						<svg class="track-play" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M5 3.5v9l7.5-4.5z" /></svg>
-						<span class="visually-hidden">(YouTube, opens in a new tab)</span>
-					</a>
-				</li>
-			))}
-		</ol>
+		<MusicGrid
+			tracks={tracks.flatMap((t) => (t.data.url ? [{ title: t.data.title, url: t.data.url, note: t.data.note, edit: t.edit.title }] : []))}
+		/>
 	</section>
 
 	<section id="contact" class="wrap section cta">
@@ -271,25 +260,6 @@ const github = settings?.social?.github;
 		padding: var(--spacing-md) var(--spacing-lg);
 		border: 1px solid var(--color-border);
 		border-bottom: 0;
-	}
-
-	/* Hairline grid: borders shared between cells (LangGraph-style) */
-	.cells {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-		border-top: 1px solid var(--color-border);
-		border-left: 1px solid var(--color-border);
-	}
-
-	.cells > :global(*) {
-		border-right: 1px solid var(--color-border);
-		border-bottom: 1px solid var(--color-border);
-		padding: var(--spacing-lg);
-		transition: background var(--transition-base);
-	}
-
-	.cells > :global(*:hover) {
-		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
 	}
 
 	.section-head .mono {
@@ -475,79 +445,6 @@ const github = settings?.social?.github;
 
 	.sc-link:hover {
 		color: var(--color-text);
-	}
-
-	/* Compact tracklist inside the frame: rows only, so any count fits */
-	.tracklist {
-		list-style: none;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-		column-gap: var(--spacing-xl);
-		padding: var(--spacing-xs) var(--spacing-lg) var(--spacing-md);
-		border: 1px solid var(--color-border);
-	}
-
-	.tracklist li {
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.track {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-md);
-		padding-block: 0.7rem;
-		text-decoration: none;
-		color: var(--color-text);
-	}
-
-	.track-n {
-		color: var(--color-muted);
-		font-size: 0.66rem;
-	}
-
-	.track-text {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		align-items: baseline;
-		gap: var(--spacing-sm);
-		overflow: hidden;
-	}
-
-	.track-title {
-		font-size: var(--font-size-sm);
-		white-space: nowrap;
-	}
-
-	.track-note {
-		font-size: 0.62rem;
-		text-transform: none;
-		letter-spacing: 0.03em;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	.track-play {
-		width: 0.8rem;
-		height: 0.8rem;
-		color: var(--color-muted);
-		flex: none;
-		transition: color var(--transition-fast), transform var(--transition-fast);
-	}
-
-	.track:hover .track-title,
-	.track:hover .track-play {
-		color: var(--color-brand);
-	}
-
-	.track:hover .track-play {
-		transform: scale(1.2);
-	}
-
-	.track:focus-visible {
-		outline: 2px solid var(--color-brand);
-		outline-offset: 2px;
 	}
 
 	.visually-hidden {

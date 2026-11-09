@@ -1,0 +1,269 @@
+---
+// Music as hairline-grid cells. YouTube tracks open in a modal player;
+// SoundCloud tracks swap in SoundCloud's one-line player inside the cell.
+interface Track {
+	title: string;
+	url: string;
+	note?: string;
+	edit?: Record<string, unknown>;
+}
+interface Props {
+	tracks: Track[];
+}
+const { tracks } = Astro.props;
+
+const ytId = (url: string) => url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/)?.[1];
+const isSoundCloud = (url: string) => /(^|\.)soundcloud\.com\//.test(new URL(url).hostname + "/");
+const scPlayer = (url: string) =>
+	`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%2399d3ff&auto_play=true&show_user=false&show_artwork=false`;
+---
+
+<ol class="music cells">
+	{
+		tracks.map((t, i) => {
+			const yt = ytId(t.url);
+			const sc = !yt && isSoundCloud(t.url);
+			return (
+				<li class:list={["cell", { sc }]}>
+					<a
+						class="track"
+						href={t.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						data-yt={yt}
+						data-sc={sc ? scPlayer(t.url) : undefined}
+						data-title={t.title}
+					>
+						<span class="track-top">
+							<span class="track-n mono">{String(i + 1).padStart(2, "0")}</span>
+							{sc && <span class="track-src mono">SoundCloud</span>}
+						</span>
+						<span class="track-title" {...t.edit}>{t.title}</span>
+						<span class="track-bottom">
+							<span class="track-note mono">{t.note}</span>
+							<span class="track-play" aria-hidden="true">
+								<svg viewBox="0 0 16 16"><path fill="currentColor" d="M5.5 3.8v8.4l7-4.2z" /></svg>
+							</span>
+						</span>
+					</a>
+				</li>
+			);
+		})
+	}
+</ol>
+
+<dialog class="player" aria-label="Video player">
+	<div class="player-frame"></div>
+	<form method="dialog" class="player-bar">
+		<span class="player-title mono"></span>
+		<button class="player-close" aria-label="Close player">
+			<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+		</button>
+	</form>
+</dialog>
+
+<script>
+	const dialog = document.querySelector<HTMLDialogElement>("dialog.player");
+	const frame = dialog?.querySelector<HTMLElement>(".player-frame");
+	const label = dialog?.querySelector<HTMLElement>(".player-title");
+
+	document.querySelectorAll<HTMLAnchorElement>(".music .track").forEach((a) => {
+		a.addEventListener("click", (e) => {
+			// keep new-tab / middle-click behaviour
+			if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+			const { yt, sc, title } = a.dataset;
+			if (yt && dialog && frame && label) {
+				e.preventDefault();
+				const f = document.createElement("iframe");
+				f.src = `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0`;
+				f.title = title || "Video";
+				f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+				f.allowFullscreen = true;
+				frame.replaceChildren(f);
+				label.textContent = title || "";
+				dialog.showModal();
+			} else if (sc) {
+				e.preventDefault();
+				const f = document.createElement("iframe");
+				f.src = sc;
+				f.title = title || "SoundCloud track";
+				f.allow = "autoplay; encrypted-media";
+				f.className = "sc-mini";
+				a.querySelector(".track-bottom")?.replaceWith(f);
+			}
+		});
+	});
+
+	// stop playback when the dialog closes; close on backdrop click
+	dialog?.addEventListener("close", () => frame?.replaceChildren());
+	dialog?.addEventListener("click", (e) => {
+		if (e.target === dialog) dialog.close();
+	});
+</script>
+
+<style>
+	.music {
+		list-style: none;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+	}
+
+	.cell {
+		padding: 0 !important;
+	}
+
+	.track {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+		height: 100%;
+		min-height: 7.5rem;
+		padding: var(--spacing-md) var(--spacing-lg);
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.track-top,
+	.track-bottom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-sm);
+	}
+
+	.track-bottom {
+		margin-top: auto;
+	}
+
+	.track-n,
+	.track-src,
+	.track-note {
+		font-size: 0.62rem;
+		text-transform: none;
+		letter-spacing: 0.04em;
+	}
+
+	.track-src {
+		color: #ff7a33;
+	}
+
+	.track-title {
+		font-size: var(--font-size-base);
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		line-height: 1.3;
+	}
+
+	.track-note {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.track-play {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		border: 1px solid var(--color-border);
+		color: var(--color-muted);
+		transition:
+			color var(--transition-fast),
+			border-color var(--transition-fast),
+			background var(--transition-fast);
+	}
+
+	.track-play svg {
+		width: 0.75rem;
+		height: 0.75rem;
+		margin-left: 1px;
+	}
+
+	.track:hover .track-play,
+	.track:focus-visible .track-play {
+		color: var(--color-on-brand);
+		background: var(--color-brand);
+		border-color: var(--color-brand);
+	}
+
+	.track:hover .track-title {
+		color: var(--color-brand);
+	}
+
+	.track:focus-visible {
+		outline: 2px solid var(--color-brand);
+		outline-offset: -2px;
+	}
+
+	.track :global(.sc-mini) {
+		margin-top: auto;
+		width: 100%;
+		height: 20px;
+		border: 0;
+	}
+
+	/* modal player */
+	.player {
+		width: min(960px, calc(100vw - 2rem));
+		max-width: none;
+		margin: auto;
+		padding: 0;
+		border: 1px solid var(--color-border);
+		border-radius: 10px;
+		background: var(--color-bg);
+		color: var(--color-text);
+		overflow: hidden;
+	}
+
+	.player::backdrop {
+		background: color-mix(in srgb, #05080d 75%, transparent);
+		backdrop-filter: blur(4px);
+	}
+
+	.player-frame {
+		aspect-ratio: 16 / 9;
+		background: #000;
+	}
+
+	.player-frame :global(iframe) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+
+	.player-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-md);
+		padding: 0.6rem var(--spacing-md);
+	}
+
+	.player-title {
+		text-transform: none;
+	}
+
+	.player-close {
+		display: grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 50%;
+		border: 1px solid var(--color-border);
+		background: transparent;
+		color: var(--color-muted);
+		cursor: pointer;
+	}
+
+	.player-close:hover {
+		color: var(--color-text);
+		border-color: var(--color-muted);
+	}
+
+	.player-close svg {
+		width: 0.85rem;
+		height: 0.85rem;
+	}
+</style>

@@ -204,10 +204,9 @@
 					"required": true
 				},
 				{
-					"slug": "video",
-					"label": "YouTube URL",
-					"type": "string",
-					"required": true
+					"slug": "url",
+					"label": "URL (YouTube or SoundCloud)",
+					"type": "string"
 				},
 				{
 					"slug": "note",
@@ -602,14 +601,25 @@
 		],
 		"music": [
 			{
+				"id": "sc-dance-away",
+				"slug": "sc-dance-away",
+				"status": "published",
+				"data": {
+					"title": "Dance Away",
+					"note": "with Erica Simeone",
+					"url": "https://soundcloud.com/david-levy/erica-simeone-selenium-dance",
+					"sort": 0
+				}
+			},
+			{
 				"id": "yt-b0rrsbaht6c",
 				"slug": "yt-b0rrsbaht6c",
 				"status": "published",
 				"data": {
 					"title": "Playground of Love",
-					"video": "https://www.youtube.com/watch?v=b0rRSBahT6c",
 					"sort": 1,
-					"note": "Live · Strasbourg · 2020"
+					"note": "Live · Strasbourg · 2020",
+					"url": "https://www.youtube.com/watch?v=b0rRSBahT6c"
 				}
 			},
 			{
@@ -618,9 +628,9 @@
 				"status": "published",
 				"data": {
 					"title": "Playground of Love",
-					"video": "https://www.youtube.com/watch?v=muOyLQGr_DM",
 					"sort": 2,
-					"note": "Piano"
+					"note": "Piano",
+					"url": "https://www.youtube.com/watch?v=muOyLQGr_DM"
 				}
 			},
 			{
@@ -629,8 +639,8 @@
 				"status": "published",
 				"data": {
 					"title": "A Lifetime",
-					"video": "https://www.youtube.com/watch?v=1RYrdSAYWJk",
-					"sort": 3
+					"sort": 3,
+					"url": "https://www.youtube.com/watch?v=1RYrdSAYWJk"
 				}
 			},
 			{
@@ -639,8 +649,8 @@
 				"status": "published",
 				"data": {
 					"title": "Melodica",
-					"video": "https://www.youtube.com/watch?v=EotEg06D01Y",
-					"sort": 4
+					"sort": 4,
+					"url": "https://www.youtube.com/watch?v=EotEg06D01Y"
 				}
 			},
 			{
@@ -649,8 +659,8 @@
 				"status": "published",
 				"data": {
 					"title": "A New Year to Come",
-					"video": "https://www.youtube.com/watch?v=aNV_VtQyaXI",
-					"sort": 5
+					"sort": 5,
+					"url": "https://www.youtube.com/watch?v=aNV_VtQyaXI"
 				}
 			},
 			{
@@ -659,9 +669,9 @@
 				"status": "published",
 				"data": {
 					"title": "And I Run",
-					"video": "https://www.youtube.com/watch?v=_vr_fD46u1Y",
 					"sort": 6,
-					"note": "Melodica"
+					"note": "Melodica",
+					"url": "https://www.youtube.com/watch?v=_vr_fD46u1Y"
 				}
 			},
 			{
@@ -670,9 +680,9 @@
 				"status": "published",
 				"data": {
 					"title": "Variations sur Alright",
-					"video": "https://www.youtube.com/watch?v=0ZD-_Vi8nNY",
 					"sort": 7,
-					"note": "Part 1"
+					"note": "Part 1",
+					"url": "https://www.youtube.com/watch?v=0ZD-_Vi8nNY"
 				}
 			},
 			{
@@ -681,9 +691,9 @@
 				"status": "published",
 				"data": {
 					"title": "Variations sur Alright",
-					"video": "https://www.youtube.com/watch?v=mgA8YCm1J5w",
 					"sort": 8,
-					"note": "Part 2"
+					"note": "Part 2",
+					"url": "https://www.youtube.com/watch?v=mgA8YCm1J5w"
 				}
 			},
 			{
@@ -692,9 +702,9 @@
 				"status": "published",
 				"data": {
 					"title": "Daylight, Part I",
-					"video": "https://www.youtube.com/watch?v=cIg5oF-TeZ0",
 					"sort": 9,
-					"note": "Improvisation"
+					"note": "Improvisation",
+					"url": "https://www.youtube.com/watch?v=cIg5oF-TeZ0"
 				}
 			},
 			{
@@ -703,9 +713,9 @@
 				"status": "published",
 				"data": {
 					"title": "Memories for 8",
-					"video": "https://www.youtube.com/watch?v=Fx5NaaA0ZZw",
 					"sort": 10,
-					"note": "Piano"
+					"note": "Piano",
+					"url": "https://www.youtube.com/watch?v=Fx5NaaA0ZZw"
 				}
 			},
 			{
@@ -714,9 +724,9 @@
 				"status": "published",
 				"data": {
 					"title": "Memories for 8",
-					"video": "https://www.youtube.com/watch?v=x8IuQORLf4A",
 					"sort": 11,
-					"note": "Live · Bar Giora, Tel Aviv · 2009"
+					"note": "Live · Bar Giora, Tel Aviv · 2009",
+					"url": "https://www.youtube.com/watch?v=x8IuQORLf4A"
 				}
 			},
 			{
@@ -725,9 +735,9 @@
 				"status": "published",
 				"data": {
 					"title": "I Am Not From Here",
-					"video": "https://www.youtube.com/watch?v=m60HZsN33as",
 					"sort": 12,
-					"note": "Live · Bar Giora, Tel Aviv · 2009"
+					"note": "Live · Bar Giora, Tel Aviv · 2009",
+					"url": "https://www.youtube.com/watch?v=m60HZsN33as"
 				}
 			},
 			{
@@ -736,9 +746,9 @@
 				"status": "published",
 				"data": {
 					"title": "Dreaming of You",
-					"video": "https://www.youtube.com/watch?v=fe_R9K0gG4U",
 					"sort": 13,
-					"note": "Piano"
+					"note": "Piano",
+					"url": "https://www.youtube.com/watch?v=fe_R9K0gG4U"
 				}
 			}
 		]

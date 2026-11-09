@@ -59,3 +59,27 @@
 	text-transform: uppercase;
 	color: var(--color-muted);
 }
+
+/*
+  Hairline grid (LangGraph-style): one 1px frame around the grid and 1px
+  lines between cells. Cells overlap the frame by 1px so edges never double,
+  and an incomplete last row still sits inside a closed frame.
+*/
+.cells {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+	border: 1px solid var(--color-border);
+	overflow: hidden;
+}
+
+.cells > * {
+	margin: 0 -1px -1px 0;
+	border-right: 1px solid var(--color-border);
+	border-bottom: 1px solid var(--color-border);
+	padding: var(--spacing-lg);
+	transition: background var(--transition-base);
+}
+
+.cells > *:hover {
+	background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+}

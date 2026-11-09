@@ -32,7 +32,7 @@ export interface Music {
   slug: string | null;
   status: string;
   title: string;
-  video: string;
+  url?: string;
   note?: string;
   sort?: number;
   createdAt: Date;
