@@ -29,7 +29,7 @@ const about = aboutResult.entry;
 const tracks = [...musicResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
 // Seeded entries share a publish date, so order by slug (project-one, -two, -three);
 // projects not in this list keep their place after them.
-const projectOrder = ["project-one", "project-two", "project-three"];
+const projectOrder = ["project-one", "project-two", "project-three", "project-four"];
 const rank = (id: string) => (projectOrder.indexOf(id) + 1 || projectOrder.length + 1);
 const projects = [...projectsResult.entries].sort((a, b) => rank(a.id) - rank(b.id));
 const roles = [...experienceResult.entries].sort(
@@ -106,8 +106,9 @@ const twitter = settings?.social?.twitter;
 					<h2>Personal projects</h2>
 				</header>
 				<div class="grid cells">
-					{projects.map((p) => (
+					{projects.map((p, i) => (
 						<ProjectCard
+							featured={i === 0}
 							title={p.data.title}
 							summary={p.data.summary}
 							featuredImage={p.data.featured_image}

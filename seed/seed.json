@@ -415,6 +415,32 @@
 					"url": "https://linescape.dev",
 					"video": "https://www.youtube.com/watch?v=9EUy7bx-grU"
 				}
+			},
+			{
+				"id": "project-four",
+				"slug": "project-four",
+				"status": "published",
+				"data": {
+					"title": "SongNature",
+					"client": "songnature.vercel.app",
+					"url": "https://songnature.vercel.app/",
+					"cover": "/projects/songnature.webp",
+					"summary": "Same track, human flavours: a curated catalogue of covers and breakdowns showing how musicians around the world reinterpret the same song.",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s0",
+									"text": "Same track, human flavours: a curated catalogue of covers and breakdowns showing how musicians around the world reinterpret the same song."
+								}
+							]
+						}
+					]
+				}
 			}
 		],
 		"experience": [

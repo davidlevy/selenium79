@@ -14,16 +14,17 @@ interface Props {
 	year?: string;
 	tags?: string[];
 	video?: string;
+	featured?: boolean; // spans the full grid row, media beside text
 	edit?: EditProxy;
 }
 
-const { title, summary, featuredImage, cover, href, client, year, tags, video, edit } =
+const { title, summary, featuredImage, cover, href, client, year, tags, video, featured, edit } =
 	Astro.props;
 const allTags = tags || [];
 ---
 
-<article class="project-card">
-	{video && <YouTube url={video} title={title} ratio="4 / 3" />}
+<article class:list={["project-card", { featured }]}>
+	{video && <YouTube url={video} title={title} ratio={featured ? "16 / 9" : "4 / 3"} />}
 	<a href={href} class="card-link" target={href ? "_blank" : undefined} rel={href ? "noopener noreferrer" : undefined}>
 		{!video && <div class="card-image" {...edit?.featured_image}>
 			{featuredImage ? (
@@ -79,6 +80,29 @@ const allTags = tags || [];
 </article>
 
 <style>
+	/* Featured: full row of the parent grid, media left / text right on wide screens */
+	.project-card.featured {
+		grid-column: 1 / -1;
+	}
+
+	@media (min-width: 760px) {
+		.project-card.featured {
+			display: grid;
+			grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+			align-items: center;
+			gap: var(--spacing-2xl);
+		}
+
+		.featured .card-title {
+			font-size: var(--font-size-2xl);
+		}
+
+		.featured .card-summary {
+			-webkit-line-clamp: unset;
+			font-size: var(--font-size-base);
+		}
+	}
+
 	.project-card {
 		position: relative;
 		display: flex;
