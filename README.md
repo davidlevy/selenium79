@@ -65,3 +65,7 @@ The first deployment provisions the named D1 database and R2 bucket from `wrangl
 - [Node.js variant](../portfolio) -- same template using SQLite and local file storage
 - [All templates](../)
 - [EmDash documentation](https://docs.emdashcms.com/)
+
+## Credits
+
+- Hero piano: right hand of Chopin's Nocturne in B-flat minor, Op. 9 No. 1 (bars 1–18). The composition is public domain; notes and timings come from the [Mutopia Project](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=582) MIDI edition, licensed [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5/).

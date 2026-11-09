@@ -21,6 +21,7 @@ export const profile = {
 	],
 	education: [
 		{ title: "Computer Science Engineer", school: "IMAC Engineering School, Paris", year: "2002" },
+		{ title: "webMethods 6 Certified Developer", school: "EAI / BPM · Vistali, Paris", year: "2003 – 2005" },
 		{ title: "Classes préparatoires PSI*", school: "Lycée Jean-Baptiste Say, Paris", year: "1999" },
 	],
 	languages: [
@@ -31,4 +32,5 @@ export const profile = {
 		{ name: "Russian", level: "Elementary" },
 	],
 	beyondCode: ["Piano — improvisation & composition", "Ecology, sustainability & low-tech", "UI/UX and industrial design"],
+	community: { name: "Agentic Israel", url: "https://www.agenticisrael.com/", blurb: "Israel's English-speaking community for people building with AI" },
 };

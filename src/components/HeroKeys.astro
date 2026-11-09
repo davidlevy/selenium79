@@ -684,69 +684,53 @@ import Arrow from "./Arrow.astro";
 		} else if (reduced) setMode(0);
 
 		// ── Autoplay scripts ──────────────────────────────────────────
-		// Opening of Chopin's Prelude in E minor, Op. 28 No. 4 (public domain):
-		// melody hovering over slowly descending chords. Simplified arrangement,
-		// transposed down a tone (D minor) to fit this keyboard (C3–B4).
-		// Each bar = 8 eighths: right-hand [note, eighths] and one left-hand chord,
-		// repeated on every beat.
-		const midiOf = (n: string) => {
-			const m = n.match(/^([A-G])(#|b)?(\d)$/)!;
-			const pc = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1] as "C"] + (m[2] === "#" ? 1 : m[2] === "b" ? -1 : 0);
-			return 12 * (Number(m[3]) + 1) + pc;
-		};
-		const TRANSPOSE = -2;
-		const bars: [rh: [string, number][], lh: string[]][] = [
-			[[["B4", 8]], ["G3", "B3", "E4"]],
-			[[["B4", 4], ["C5", 2], ["B4", 2]], ["G3", "B3", "E4"]],
-			[[["B4", 8]], ["F#3", "A3", "D#4"]],
-			[[["A#4", 2], ["B4", 6]], ["F#3", "A3", "D4"]],
-			[[["B4", 4], ["C5", 2], ["B4", 2]], ["F3", "A3", "D4"]],
-			[[["B4", 8]], ["E3", "A3", "C4"]],
-			[[["A4", 4], ["B4", 2], ["A4", 2]], ["E3", "G3", "C4"]],
-			[[["A4", 8]], ["D#3", "F#3", "C4"]],
-			[[["A4", 4], ["B4", 2], ["A4", 2]], ["D3", "F#3", "C4"]],
-			[[["G4", 8]], ["D3", "F3", "B3"]],
-			[[["G4", 4], ["A4", 2], ["G4", 2]], ["E3", "A3", "C4"]],
-			[[["F#4", 8]], ["D#3", "F#3", "B3"]],
-		];
-		// Flatten to one step per eighth note: which keys to strike, and for how long.
-		const score: { midi: number; len: number }[][] = [];
-		bars.forEach(([rh, lh], b) => {
-			const base = b * 8;
-			for (let i = 0; i < 8; i++) score[base + i] = [];
-			let pos = 0;
-			for (const [name, len] of rh) {
-				score[base + pos].push({ midi: midiOf(name) + TRANSPOSE, len });
-				pos += len;
-			}
-			for (const beat of [0, 2, 4, 6]) {
-				for (const name of lh) score[base + beat].push({ midi: midiOf(name) + TRANSPOSE, len: 2 });
-			}
-		});
-		const EIGHTH = 320; // ms — largo
+		// Chopin — Nocturne in B-flat minor, Op. 9 No. 1, right hand, bars 1–18.
+		// Notes and timings extracted from the Mutopia Project MIDI edition
+		// (mutopiaproject.org, piece 582, CC BY-SA 2.5); the composition is public
+		// domain. Transposed by -20 semitones and octave-folded to fit C3–B4.
+		// Flat list of [start ms, duration ms, midi] triples.
+		const NOCTURNE = [0,259,62,259,259,64,517,259,65,776,259,61,1034,259,62,1293,259,58,1552,517,57,2069,517,57,2586,517,57,3103,517,57,3621,259,58,3879,259,57,4138,259,55,4397,259,52,4655,1034,53,5690,517,50,6207,140,62,6347,140,64,6487,140,65,6627,140,61,6767,140,62,6907,140,61,7047,140,60,7187,140,61,7328,140,64,7468,140,62,7608,140,58,7748,140,57,7888,140,58,8028,140,56,8168,140,57,8308,140,62,8448,140,61,8588,140,60,8728,140,59,8869,140,58,9009,140,57,9149,140,56,9289,140,55,9429,140,54,9569,140,53,9709,140,52,9849,140,53,9989,140,52,10129,140,51,10269,140,52,10409,140,57,10550,140,56,10690,140,55,10830,1034,53,11864,517,50,12381,517,62,12899,517,62,13416,517,62,13933,2845,60,15485,517,53,16002,259,50,16261,259,52,16519,259,53,16778,259,58,17037,1552,57,18588,517,55,19106,259,57,19364,259,55,19623,259,53,19881,259,49,20140,1034,48,21175,517,53,21692,517,55,22209,259,57,22468,259,55,22726,259,53,22985,259,55,23244,1552,57,24795,259,62,25054,259,64,25312,259,65,25571,259,61,25762,259,64,25830,259,62,26088,259,58,26347,517,57,26864,517,57,27381,517,57,27899,517,57,28416,259,58,28675,259,57,28933,259,55,29192,259,52,29450,1034,53,30485,517,50,31002,140,62,31142,140,64,31282,140,65,31422,140,61,31562,140,62,31703,140,61,31843,140,60,31983,139,61,32121,140,64,32262,140,62,32402,140,58,32542,172,57,32714,172,69,32887,172,68,33059,172,67,33231,172,65,33404,172,64,33576,172,62,33749,172,70,33921,172,69,34093,172,68,34266,172,67,34438,172,65,34611,172,64,34783,172,62,34956,172,61,35128,172,58,35300,172,57,35473,172,52,35645,1034,53,36680,517,50,37197,517,62,37714,517,62,38231,517,62,38749,1034,62,39783,517,54,40300,517,55,40818,259,54,41076,259,55,41335,388,58,41723,129,57,41852,1034,57,42887,517,56,43336,288,57,43370,129,58,43625,221,56,43846,220,57,44065,221,59,44286,220,61,44506,221,62,44727,221,64,44947,1034,65,45982,172,62,46154,172,58,46327,172,50,46499,1034,53,47534,517,52,47984,259,50,48051,776,69,48827,259,65,49085,172,62,49258,172,58,49430,172,50,49603,1034,53,50637,517,52,51087,259,50,51154,690,65,51844,172,62,52016,172,70,52189,172,65,52361,172,62,52534,172,50,52706,1034,51,53741,517,49,54258,1552,50];
+		const NOCTURNE_LENGTH = 55862; // ms, then a short breath before looping
+		let noteI = 0;
+		let pianoClock = -400; // ms into the piece (paused outside piano mode)
+		let pianoLast = 0;
 		// A Claude Code session: prompt typed key by key, then the agent's steps.
 		const sessions: { prompt: string; out: [string, string, string] }[] = [
-			{ prompt: "add retry with backoff to the stripe webhook", out: ["● Read src/webhooks/stripe.ts", "● Update stripe.ts  +18 −3", "✓ 14 tests passed · PR #482 ready"] },
-			{ prompt: "write playwright tests for the onboarding flow", out: ["● Read app/onboarding/page.tsx", "● Write e2e/onboarding.spec.ts  +96", "✓ 6 passed (12.4s)"] },
-			{ prompt: "why is the dashboard slow on first load?", out: ["● Grep useQuery( · 23 matches", "● 4 waterfalled requests in Dashboard.tsx", "✓ batched into 1 · LCP 2.9s → 1.1s"] },
-			{ prompt: "summarise report-q3.pdf with citations", out: ["● Read report-q3.pdf · 42 pages", "● 1,284 chunks → embeddings[1536]", "✓ 5 key points · 12 citations"] },
-			{ prompt: "review open PRs and flag risky changes", out: ["● gh pr list · 7 open", "● #491 touches auth middleware", "✓ 1 flagged · 6 approved"] },
+			{ prompt: "teach the piano to play some chopin", out: ["● Read nocturne-op9-no1.mid · 697 notes", "● Map to 2 octaves · fold 8 notes", "✓ now playing on the left ♪"] },
+			{ prompt: "turn every keystroke into music", out: ["● bytes → pentatonic scale", "● 0x68 → A · 0x69 → C · 0x20 → E", "✓ the keyboard is an instrument now"] },
+			{ prompt: "write tests until everything is green", out: ["● Write 12 specs", "● 11 passed · 1 failing", "✓ fixed · 12/12 green"] },
+			{ prompt: "make the dashboard feel instant", out: ["● 4 waterfalled requests found", "● batched into 1 · cached at the edge", "✓ LCP 2.9s → 1.1s"] },
+			{ prompt: "explain this repo like i'm five", out: ["● Read 214 files", "● it's lego bricks for websites", "✓ wrote ELI5.md"] },
 		];
 		let replyN = 0; // agent output lines revealed for the current session
-		let scoreI = 0;
 		let phraseI = 0;
 		let charI = 0;
 		let nextAuto = 0;
 
 		function autoStep(now: number) {
-			if (reduced || now - lastHuman < 2500 || now < nextAuto) return;
+			if (reduced || now - lastHuman < 2500) {
+				pianoLast = 0;
+				return;
+			}
 			if (t < 0.12) {
-				for (const n of score[scoreI++ % score.length]) {
-					const pi = pianoByMidi.get(n.midi);
-					if (pi !== undefined) pressPiano(pi, n.len * EIGHTH * 0.85);
+				// real-time playback of the nocturne; the clock pauses outside piano mode
+				pianoClock += pianoLast ? now - pianoLast : 0;
+				pianoLast = now;
+				while (noteI * 3 < NOCTURNE.length && NOCTURNE[noteI * 3] <= pianoClock) {
+					const dur = NOCTURNE[noteI * 3 + 1];
+					const pi = pianoByMidi.get(NOCTURNE[noteI * 3 + 2]);
+					if (pi !== undefined) pressPiano(pi, Math.min(dur * 0.9, 900));
+					noteI++;
 				}
-				nextAuto = now + EIGHTH;
-			} else if (t > 0.88) {
+				if (pianoClock > NOCTURNE_LENGTH) {
+					noteI = 0;
+					pianoClock = -1500;
+				}
+				return;
+			}
+			pianoLast = 0;
+			if (now < nextAuto) return;
+			if (t > 0.88) {
 				const phrase = sessions[phraseI % sessions.length].prompt;
 				if (charI === 0 && replyN === 0) typed = "";
 				if (charI < phrase.length) {
