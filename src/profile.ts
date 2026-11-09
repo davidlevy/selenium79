@@ -20,8 +20,8 @@ export const profile = {
 		"Tech hiring & mentoring",
 	],
 	education: [
+		{ title: "webMethods 6 Certified Developer", school: "EAI / BPM · Vistali, Paris", year: "2004" },
 		{ title: "Computer Science Engineer", school: "IMAC Engineering School, Paris", year: "2002" },
-		{ title: "webMethods 6 Certified Developer", school: "EAI / BPM · Vistali, Paris", year: "2003 – 2005" },
 		{ title: "Classes préparatoires PSI*", school: "Lycée Jean-Baptiste Say, Paris", year: "1999" },
 	],
 	languages: [
