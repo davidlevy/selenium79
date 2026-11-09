@@ -27,8 +27,11 @@ if (Astro.cache?.enabled) {
 }
 const about = aboutResult.entry;
 const tracks = [...musicResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
-// Seeded entries share a publish date, so order by slug (project-one, -two, …).
-const projects = [...projectsResult.entries].sort((a, b) => a.id.localeCompare(b.id));
+// Seeded entries share a publish date, so order by slug (project-one, -two, -three);
+// projects not in this list keep their place after them.
+const projectOrder = ["project-one", "project-two", "project-three"];
+const rank = (id: string) => (projectOrder.indexOf(id) + 1 || projectOrder.length + 1);
+const projects = [...projectsResult.entries].sort((a, b) => rank(a.id) - rank(b.id));
 const roles = [...experienceResult.entries].sort(
 	(a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99),
 );
