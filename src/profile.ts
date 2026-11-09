@@ -58,7 +58,7 @@ export const profile = {
 		{ kind: "atari-st", name: "Atari 520 ST", year: "1985", note: "MIDI ports built in: where code and music first met." },
 		{ kind: "yamaha-qx5", name: "Yamaha QX5", year: "1986", note: "A hardware sequencer — my first loops, recorded bar by bar." },
 		{ kind: "korg-x5", name: "Korg X5", year: "1994", note: "My first synth. 61 keys and endless AI² presets." },
-		{ kind: "3m-mouse", name: "3M Ergonomic Mouse", year: "2006", note: "A joystick for the desk: a handshake grip my wrist still thanks me for." },
+		{ kind: "3m-mouse", name: "3M Ergonomic Mouse", year: "2011", note: "A joystick for the desk: a handshake grip my wrist still thanks me for." },
 		{ kind: "boox-nova3", name: "Boox Nova3 Color", year: "2021", note: "Colour e-ink and a pen: reading and sketching without the glow." },
 	] as const,
 };
