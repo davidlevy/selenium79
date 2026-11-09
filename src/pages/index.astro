@@ -27,7 +27,8 @@ if (Astro.cache?.enabled) {
 }
 const about = aboutResult.entry;
 const tracks = [...musicResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
-const projects = projectsResult.entries;
+// Seeded entries share a publish date, so order by slug (project-one, -two, …).
+const projects = [...projectsResult.entries].sort((a, b) => a.id.localeCompare(b.id));
 const roles = [...experienceResult.entries].sort(
 	(a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99),
 );
@@ -180,20 +181,24 @@ const twitter = settings?.social?.twitter;
 		</div>
 	</section>
 
+	{
+		tracks.length > 0 && (
 	<section id="music" class="wrap section">
-		<header class="section-head framed music-head">
-			<span class="mono">04</span>
-			<h2>Music</h2>
-			<p class="music-sub">Piano, melodica &amp; improvisation</p>
-			<a class="sc-link" href={profile.soundcloud} target="_blank" rel="noopener noreferrer">
-				<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 7.6a5 5 0 0 1 8.7 2.9A3.2 3.2 0 1 1 20.8 17H11zM9.2 9h1v8h-1zM7.4 10h1v7h-1zM5.6 9.5h1V17h-1zM3.8 11h1v6h-1zM2 12.5h1V17H2z" /></svg>
-				SoundCloud <Arrow />
-			</a>
-		</header>
-		<MusicGrid
-			tracks={tracks.flatMap((t) => (t.data.url ? [{ title: t.data.title, url: t.data.url, note: t.data.note, edit: t.edit.title }] : []))}
-		/>
-	</section>
+				<header class="section-head framed music-head">
+					<span class="mono">04</span>
+					<h2>Music</h2>
+					<p class="music-sub">Piano, melodica &amp; improvisation</p>
+					<a class="sc-link" href={profile.soundcloud} target="_blank" rel="noopener noreferrer">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11 7.6a5 5 0 0 1 8.7 2.9A3.2 3.2 0 1 1 20.8 17H11zM9.2 9h1v8h-1zM7.4 10h1v7h-1zM5.6 9.5h1V17h-1zM3.8 11h1v6h-1zM2 12.5h1V17H2z" /></svg>
+						SoundCloud <Arrow />
+					</a>
+				</header>
+				<MusicGrid
+					tracks={tracks.flatMap((t) => (t.data.url ? [{ title: t.data.title, url: t.data.url, note: t.data.note, edit: t.edit.title }] : []))}
+				/>
+			</section>
+		)
+	}
 
 	<section id="contact" class="wrap section cta">
 		<p class="mono">05 · Contact</p>
