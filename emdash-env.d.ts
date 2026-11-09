@@ -79,11 +79,28 @@ export interface Project {
   terms?: Record<string, TaxonomyTerm[]>;
 }
 
+export interface Recommended {
+  id: string;
+  slug: string | null;
+  status: string;
+  title: string;
+  url: string;
+  blurb?: string;
+  sort?: number;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt: Date | null;
+  byline?: BylineSummary | null;
+  bylines?: ContentBylineCredit[];
+  terms?: Record<string, TaxonomyTerm[]>;
+}
+
 declare module "emdash" {
   interface EmDashCollections {
     experience: Experience;
     music: Music;
     pages: Page;
     projects: Project;
+    recommended: Recommended;
   }
 }

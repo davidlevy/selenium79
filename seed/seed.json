@@ -225,6 +225,39 @@
 					"type": "integer"
 				}
 			]
+		},
+		{
+			"slug": "recommended",
+			"label": "Recommended",
+			"labelSingular": "Recommended site",
+			"supports": [
+				"drafts",
+				"revisions"
+			],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Name",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "url",
+					"label": "URL",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "blurb",
+					"label": "Short description",
+					"type": "text"
+				},
+				{
+					"slug": "sort",
+					"label": "Sort order (lower = first)",
+					"type": "integer"
+				}
+			]
 		}
 	],
 	"taxonomies": [
@@ -711,6 +744,30 @@
 					"sort": 13,
 					"note": "Piano",
 					"url": "https://www.youtube.com/watch?v=fe_R9K0gG4U"
+				}
+			}
+		],
+		"recommended": [
+			{
+				"id": "hamitaperim",
+				"slug": "hamitaperim",
+				"status": "published",
+				"data": {
+					"title": "HaMeetupers · המיטאפרים",
+					"url": "https://hamitaperim.com/",
+					"blurb": "Every in-person tech meetup in Tel Aviv and around, updated daily from Meetup, Luma, LinkedIn and community calendars.",
+					"sort": 0
+				}
+			},
+			{
+				"id": "skills-il",
+				"slug": "skills-il",
+				"status": "published",
+				"data": {
+					"title": "Skills IL",
+					"url": "https://agentskills.co.il/",
+					"blurb": "Free, open-source, security-screened skills and MCP servers for AI agents — with a focus on Hebrew and Israeli topics.",
+					"sort": 1
 				}
 			}
 		]

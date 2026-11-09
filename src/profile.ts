@@ -39,19 +39,6 @@ export const profile = {
 		{ label: "Coldplay — a sky full of stars", icon: "stars" },
 	],
 	community: { name: "Agentic Israel", url: "https://www.agenticisrael.com/", blurb: "Israel's English-speaking community for people building with AI" },
-	// "Recommended" section: sites worth a visit (GitHub stars are fetched live)
-	recommended: [
-		{
-			name: "HaMeetupers · המיטאפרים",
-			url: "https://hamitaperim.com/",
-			blurb: "Every in-person tech meetup in Tel Aviv and around, updated daily from Meetup, Luma, LinkedIn and community calendars.",
-		},
-		{
-			name: "Skills IL",
-			url: "https://agentskills.co.il/",
-			blurb: "Free, open-source, security-screened skills and MCP servers for AI agents — with a focus on Hebrew and Israeli topics.",
-		},
-	],
 	// "Gear I love" section — drawn as wireframes by GearArt, oldest first
 	gear: [
 		{ kind: "delorean", name: "DeLorean DMC-12", year: "1981", note: "Stainless steel, gull-wing doors, 1.21 gigawatts." },

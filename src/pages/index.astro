@@ -11,12 +11,13 @@ import GearArt from "../components/GearArt.astro";
 import { formatStars, getRecentStars } from "../lib/github";
 import { profile } from "../profile";
 
-const [settings, projectsResult, experienceResult, aboutResult, musicResult] = await Promise.all([
+const [settings, projectsResult, experienceResult, aboutResult, musicResult, recommendedResult] = await Promise.all([
 	getSiteSettings(),
 	getEmDashCollection("projects", { orderBy: { published_at: "asc" }, limit: 6 }),
 	getEmDashCollection("experience", { limit: 20 }),
 	getEmDashEntry("pages", "about"),
 	getEmDashCollection("music", { limit: 50 }),
+	getEmDashCollection("recommended", { limit: 50 }),
 ]);
 if (projectsResult.error || experienceResult.error || aboutResult.error || musicResult.error) {
 	return new Response("Could not load the site", { status: 500 });
@@ -26,6 +27,7 @@ if (Astro.cache?.enabled) {
 	Astro.cache.set(experienceResult.cacheHint);
 	Astro.cache.set(aboutResult.cacheHint);
 	Astro.cache.set(musicResult.cacheHint);
+	if (!recommendedResult.error) Astro.cache.set(recommendedResult.cacheHint);
 }
 const about = aboutResult.entry;
 const tracks = [...musicResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
@@ -42,7 +44,24 @@ const linkedin = settings?.social?.linkedin;
 const github = settings?.social?.github;
 const twitter = settings?.social?.twitter;
 const githubUser = github?.match(/github\.com\/([^/?#]+)/)?.[1];
-const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
+// Optional section: a missing "recommended" collection just hides the sites.
+const sites = recommendedResult.error
+	? []
+	: [...recommendedResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
+// Up to 11 starred repos, trimmed so sites + stars fill whole rows of 4 (and so of 2 and 1).
+const fetchedStars = githubUser ? await getRecentStars(githubUser, 11) : [];
+const stars = fetchedStars.slice(
+	0,
+	Math.max(0, fetchedStars.length - ((sites.length + fetchedStars.length) % 4)),
+);
+// Editors type the URL by hand: show it as-is if it doesn't parse.
+const hostname = (url: string) => {
+	try {
+		return new URL(url).hostname.replace(/^www\./, "");
+	} catch {
+		return url;
+	}
+};
 ---
 
 <Base>
@@ -244,16 +263,16 @@ const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
 			)}
 		</header>
 		<ol class="cells recs">
-			{profile.recommended.map((r) => (
+			{sites.map(({ data: r }) => (
 				<li class="rec-site">
 					<a class="rec" href={r.url} target="_blank" rel="noopener noreferrer">
 						<span class="rec-top mono">
 							<span class="rec-tag">Site</span>
 							<Arrow />
 						</span>
-						<span class="rec-title">{r.name}</span>
-						<span class="rec-desc">{r.blurb}</span>
-						<span class="rec-meta mono">{new URL(r.url).hostname.replace(/^www\./, "")}</span>
+						<span class="rec-title">{r.title}</span>
+						{r.blurb && <span class="rec-desc">{r.blurb}</span>}
+						<span class="rec-meta mono">{hostname(r.url)}</span>
 					</a>
 				</li>
 			))}
@@ -539,7 +558,7 @@ const stars = githubUser ? await getRecentStars(githubUser, 10) : [];
 	}
 
 	/* Recommended: small cells like the music grid */
-	/* 2 sites + 10 stars = 12 cells → full rows at 4, 2 or 1 columns */
+	/* sites + stars is kept a multiple of 4 → full rows at 4, 2 or 1 columns */
 	.recs {
 		list-style: none;
 		grid-template-columns: minmax(0, 1fr);
