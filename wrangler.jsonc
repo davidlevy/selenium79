@@ -8,6 +8,14 @@
 		{
 			"binding": "DB",
 			"database_name": "selenium79",
+			"database_id": "18945354-3284-4a0b-9481-d94250ceb4e7",
+		},
+	],
+	// Astro sessions store (auto-provisioned on first deploy; pinned to reuse it)
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "bf869b2be6c84f3eb05c5a6a6cdd62c9",
 		},
 	],
 	"r2_buckets": [
