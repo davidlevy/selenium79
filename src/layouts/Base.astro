@@ -95,6 +95,11 @@ const isLoggedIn = Boolean(Astro.locals.user);
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />
+		<a class="built-with" href="https://claude.com/claude-code" target="_blank" rel="noopener noreferrer">
+			<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5l1 4.2 3.6-2.3-2.3 3.6 4.2 1-4.2 1 2.3 3.6-3.6-2.3-1 4.2-1-4.2-3.6 2.3 2.3-3.6-4.2-1 4.2-1-2.3-3.6 3.6 2.3z" /></svg>
+			<span>Built with <b>Claude Code</b> · <b>Opus 5.5</b></span>
+			<Arrow />
+		</a>
 		<header class="site-header">
 			<nav class="nav">
 				<a href="/" class="site-title" aria-label={`selenium79 — ${siteTitle}, home`}>
@@ -309,6 +314,44 @@ const isLoggedIn = Boolean(Astro.locals.user);
 		</style>
 
 		<style>
+			.built-with {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.45rem;
+				padding: 0.45rem 1rem;
+				border-bottom: 1px solid var(--color-border);
+				font-family: var(--font-mono), ui-monospace, monospace;
+				font-size: 0.68rem;
+				letter-spacing: 0.04em;
+				color: var(--color-muted);
+				text-decoration: none;
+				transition:
+					color var(--transition-fast),
+					background var(--transition-fast);
+			}
+
+			.built-with b {
+				font-weight: 500;
+				color: var(--color-text);
+			}
+
+			.built-with svg {
+				width: 0.8rem;
+				height: 0.8rem;
+				color: var(--color-brand);
+			}
+
+			.built-with:hover {
+				color: var(--color-text);
+				background: color-mix(in srgb, var(--color-brand) 6%, transparent);
+			}
+
+			.built-with:focus-visible {
+				outline: 2px solid var(--color-brand);
+				outline-offset: -2px;
+			}
+
 			.site-header {
 				position: sticky;
 				top: 0;
