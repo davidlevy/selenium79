@@ -1,0 +1,32 @@
+---
+// Geist-style arrow (1.5 stroke, square geometry). Inherits colour and scales with font size.
+interface Props {
+	dir?: "up-right" | "right";
+}
+const { dir = "up-right" } = Astro.props;
+---
+
+<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square">
+	{
+		dir === "up-right" ? (
+			<path d="M5 11 11 5M6 5h5v5" />
+		) : (
+			<path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" />
+		)
+	}
+</svg>
+
+<style>
+	.arrow {
+		display: inline-block;
+		width: 0.9em;
+		height: 0.9em;
+		vertical-align: -0.08em;
+		flex: none;
+		transition: transform var(--transition-fast);
+	}
+
+	:global(a:hover) > .arrow {
+		transform: translate(1px, -1px);
+	}
+</style>

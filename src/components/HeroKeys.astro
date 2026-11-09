@@ -1,0 +1,863 @@
+---
+import Arrow from "./Arrow.astro";
+/**
+ * Fig 1.1 — an isometric wireframe piano that morphs into a Mac keyboard.
+ * Both states are playable: piano keys sound notes; Mac keys emit bytes
+ * that are quantised to a pentatonic scale. Everything is drawn into one SVG
+ * by the client script below (no dependencies).
+ */
+---
+
+<figure class="fig" data-fig aria-labelledby="fig-caption">
+<div class="fig-inner">
+	<div class="fig-stage" data-stage>
+		<svg
+			class="fig-svg"
+			data-svg
+			role="img"
+			aria-label="Wireframe illustration of a piano keyboard that transforms into a Mac keyboard. Keys can be pressed to play notes and emit bytes."
+		>
+			<g data-panel></g>
+			<g data-bed></g>
+			<g data-keys></g>
+			<g data-particles></g>
+		</svg>
+	</div>
+
+	<div class="fig-side">
+		<div class="fig-legend">
+			<span class="mono fig-num">Fig 1.1</span>
+			<span class="mono fig-hint" data-hint>Hover <Arrow dir="right" /> morph · click <Arrow dir="right" /> play</span>
+		</div>
+		<div class="fig-controls" role="group" aria-label="Animation controls">
+			<button type="button" class="chip" data-set="0" aria-pressed="false">Piano</button>
+			<button type="button" class="chip" data-set="auto" aria-pressed="true">Auto</button>
+			<button type="button" class="chip" data-set="1" aria-pressed="false">Keyboard</button>
+			<button type="button" class="chip chip-sound" data-sound aria-pressed="false">
+				<span class="dot" aria-hidden="true"></span>Sound
+			</button>
+		</div>
+		<span class="mono fig-status" data-status aria-live="off">♪ 0 notes</span>
+	</div>
+</div>
+	<figcaption id="fig-caption" class="visually-hidden">
+		Figure 1.1: from piano to keyboard — music and bytes.
+	</figcaption>
+</figure>
+
+<style>
+	.fig {
+		position: relative;
+		container-type: inline-size;
+		user-select: none;
+		-webkit-user-select: none;
+	}
+
+	.fig-inner {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-xs);
+	}
+
+	/* Compact caption row under the drawing */
+	.fig-side {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-xs) var(--spacing-md);
+		padding-top: var(--spacing-sm);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.fig-legend {
+		display: flex;
+		align-items: baseline;
+		gap: var(--spacing-md);
+	}
+
+	.fig-side .mono {
+		font-size: 0.66rem;
+		letter-spacing: 0.08em;
+		white-space: nowrap;
+	}
+
+	.fig-num {
+		color: var(--color-brand);
+	}
+
+	.fig-stage {
+		position: relative;
+		width: 100%;
+		touch-action: pan-y;
+	}
+
+	@container (max-width: 560px) {
+		.fig-side {
+			justify-content: center;
+		}
+
+		.fig-hint {
+			display: none;
+		}
+	}
+
+	.fig-svg {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-height: min(70svh, 680px);
+		overflow: visible;
+		color: var(--color-line);
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.fig-svg :global(.k) {
+		cursor: pointer;
+	}
+
+	.fig-svg :global(.k polygon) {
+		fill: var(--color-bg);
+		stroke: currentColor;
+		stroke-width: 1;
+		stroke-linejoin: round;
+		vector-effect: non-scaling-stroke;
+		transition: stroke 120ms ease;
+	}
+
+	.fig-svg :global(.k.on polygon) {
+		stroke: var(--color-brand);
+	}
+
+	.fig-svg :global(.k .top) {
+		stroke: var(--color-line-strong);
+		stroke-opacity: 0.55;
+	}
+
+	.fig-svg :global(.k.on .top) {
+		fill: color-mix(in srgb, var(--color-brand) 14%, var(--color-bg));
+		stroke-opacity: 1;
+	}
+
+	.fig-svg :global(.lbl) {
+		font-family: var(--font-mono), ui-monospace, monospace;
+		fill: var(--color-line-strong);
+		pointer-events: none;
+	}
+
+	.fig-svg :global(.wire) {
+		fill: var(--color-bg);
+		stroke: currentColor;
+		stroke-width: 1;
+		stroke-linejoin: round;
+		vector-effect: non-scaling-stroke;
+	}
+
+	.fig-svg :global(.wire-strong) {
+		stroke: var(--color-line-strong);
+		stroke-opacity: 0.7;
+	}
+
+	.fig-svg :global(.hatch) {
+		stroke: currentColor;
+		stroke-width: 1;
+		vector-effect: non-scaling-stroke;
+		opacity: 0.6;
+	}
+
+	.fig-svg :global(.ptxt) {
+		font-family: var(--font-mono), ui-monospace, monospace;
+		fill: var(--color-line-strong);
+	}
+
+	.fig-svg :global(.ptxt.dim) {
+		fill: currentColor;
+	}
+
+	.fig-svg :global(.ptxt.acc) {
+		fill: var(--color-brand);
+	}
+
+	.fig-svg :global(.staff) {
+		stroke: currentColor;
+		stroke-width: 1;
+		vector-effect: non-scaling-stroke;
+		opacity: 0.55;
+	}
+
+	.fig-svg :global(.note) {
+		fill: var(--color-brand);
+	}
+
+	.fig-svg :global(.particle) {
+		font-family: var(--font-mono), ui-monospace, monospace;
+		fill: var(--color-brand);
+		pointer-events: none;
+	}
+
+	.fig-controls {
+		display: flex;
+		gap: var(--spacing-xs);
+		flex-wrap: wrap;
+	}
+
+	.chip {
+		font-family: var(--font-mono), ui-monospace, monospace;
+		font-size: 0.62rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--color-muted);
+		background: transparent;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		padding: 0.2rem 0.6rem;
+		min-height: 1.6rem;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		transition:
+			color var(--transition-fast),
+			border-color var(--transition-fast),
+			background var(--transition-fast);
+	}
+
+	.chip:hover {
+		color: var(--color-text);
+		border-color: var(--color-muted);
+	}
+
+	.chip[aria-pressed="true"] {
+		color: var(--color-brand);
+		border-color: color-mix(in srgb, var(--color-brand) 60%, transparent);
+		background: color-mix(in srgb, var(--color-brand) 12%, transparent);
+	}
+
+	@media (pointer: coarse) {
+		.chip {
+			min-height: 2rem;
+			padding-inline: 0.7rem;
+		}
+	}
+
+	.chip:focus-visible {
+		outline: 2px solid var(--color-brand);
+		outline-offset: 2px;
+	}
+
+	.dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--color-muted);
+	}
+
+	.chip-sound[aria-pressed="true"] .dot {
+		background: var(--color-brand);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 25%, transparent);
+	}
+
+	.fig-status {
+		font-variant-numeric: tabular-nums;
+		text-transform: none;
+		letter-spacing: 0.02em;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		.fig-hint {
+			display: none;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.fig-stage {
+			width: calc(100% + 2rem);
+			margin-inline: -1rem;
+		}
+	}
+</style>
+
+<script>
+	type Rect = { x: number; y: number; w: number; d: number; h: number };
+	type Key = {
+		el: SVGGElement;
+		polys: SVGPolygonElement[];
+		lbl: SVGTextElement | null;
+		mac: Rect;
+		src: number; // index of the piano key this Mac key grows out of
+		label: string;
+		code: string; // KeyboardEvent.code
+		press: number; // 0..1 animated depression
+		hold: number; // time (ms) until release
+		z: number; // current top height, for draw ordering
+	};
+
+	const NS = "http://www.w3.org/2000/svg";
+	const C30 = Math.cos(Math.PI / 6);
+	const S30 = 0.5;
+	const U = 26; // px per unit (viewBox units)
+	const W = 16; // keyboard width in units
+	const DEPTH = 5.6;
+
+	// ── Isometric projection ──────────────────────────────────────────
+	// x runs down-right, y (depth) runs up-right, z is up.
+	const P = (x: number, y: number, z: number) =>
+		[(x + y) * C30 * U, ((x - y) * S30 - z) * U] as const;
+	const pts = (list: (readonly [number, number])[]) =>
+		list.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+
+	// ── Piano: 2 octaves, C3..B4 ──────────────────────────────────────
+	const WW = W / 14;
+	const GAP = 0.07;
+	const piano: (Rect & { black: boolean; midi: number })[] = [];
+	const whiteSteps = [0, 2, 4, 5, 7, 9, 11];
+	for (let i = 0; i < 14; i++) {
+		piano.push({
+			x: i * WW + GAP,
+			y: 0,
+			w: WW - GAP * 2,
+			d: DEPTH,
+			h: 0.45,
+			black: false,
+			midi: 48 + Math.floor(i / 7) * 12 + whiteSteps[i % 7],
+		});
+	}
+	const blackAfter = [0, 1, 3, 4, 5]; // black key after these white indices
+	for (let o = 0; o < 2; o++) {
+		for (const b of blackAfter) {
+			const wi = o * 7 + b;
+			const bw = WW * 0.58;
+			piano.push({
+				x: (wi + 1) * WW - bw / 2,
+				y: DEPTH * 0.4,
+				w: bw,
+				d: DEPTH * 0.6,
+				h: 0.8,
+				black: true,
+				midi: 48 + o * 12 + whiteSteps[b] + 1,
+			});
+		}
+	}
+	const pianoByMidi = new Map(piano.map((k, i) => [k.midi, i]));
+
+	// ── Mac layout: 5 rows of 15 units ────────────────────────────────
+	type Spec = [string, number, string];
+	const L = (s: string, code: string): Spec => [s, 1, code];
+	const letters = (s: string, prefix = "Key") =>
+		s.split("").map((c) => L(c, prefix + c.toUpperCase()));
+	const rows: Spec[][] = [
+		[["~", 1, "Backquote"], ...("1234567890".split("").map((c) => L(c, "Digit" + c))), L("-", "Minus"), L("=", "Equal"), ["delete", 2, "Backspace"]],
+		[["tab", 1.5, "Tab"], ...letters("QWERTYUIOP"), L("[", "BracketLeft"), L("]", "BracketRight"), ["\\", 1.5, "Backslash"]],
+		[["caps", 1.75, "CapsLock"], ...letters("ASDFGHJKL"), L(";", "Semicolon"), L("'", "Quote"), ["return", 2.25, "Enter"]],
+		[["shift", 2.25, "ShiftLeft"], ...letters("ZXCVBNM"), L(",", "Comma"), L(".", "Period"), L("/", "Slash"), ["shift", 2.75, "ShiftRight"]],
+		[["fn", 1, "Fn"], ["ctrl", 1, "ControlLeft"], ["opt", 1, "AltLeft"], ["⌘", 1.25, "MetaLeft"], ["", 5.5, "Space"], ["⌘", 1.25, "MetaRight"], ["opt", 1, "AltRight"], ["←", 1, "ArrowLeft"], ["↕", 1, "ArrowUp"], ["→", 1, "ArrowRight"]],
+	];
+	const unit = W / 15;
+	const rowD = (DEPTH - 4 * 0.12) / 5;
+	const macSpecs: { r: Rect; label: string; code: string }[] = [];
+	rows.forEach((row, ri) => {
+		let x = 0;
+		const y = DEPTH - (ri + 1) * rowD - ri * 0.12; // row 0 at the back
+		for (const [label, wu, code] of row) {
+			macSpecs.push({
+				r: { x: x * unit + 0.05, y, w: wu * unit - 0.1, d: rowD, h: 0.28 },
+				label,
+				code,
+			});
+			x += wu;
+		}
+	});
+
+	// Each Mac key grows out of a piano key. First guarantee every piano key
+	// owns at least one Mac key, then attach the rest to the nearest key.
+	const cx = (r: Rect) => r.x + r.w / 2;
+	const cy = (r: Rect) => r.y + r.d / 2;
+	const src = new Array(macSpecs.length).fill(-1);
+	piano.forEach((p, pi) => {
+		let best = -1;
+		let bd = Infinity;
+		macSpecs.forEach((m, mi) => {
+			if (src[mi] !== -1) return;
+			const back = m.r.y > DEPTH * 0.55;
+			if (p.black !== back) return;
+			const d = Math.abs(cx(m.r) - cx(p)) + 0.3 * Math.abs(cy(m.r) - cy(p));
+			if (d < bd) {
+				bd = d;
+				best = mi;
+			}
+		});
+		if (best >= 0) src[best] = pi;
+	});
+	macSpecs.forEach((m, mi) => {
+		if (src[mi] !== -1) return;
+		let bd = Infinity;
+		piano.forEach((p, pi) => {
+			const d = Math.hypot(cx(m.r) - cx(p), (cy(m.r) - cy(p)) * 0.5);
+			if (d < bd) {
+				bd = d;
+				src[mi] = pi;
+			}
+		});
+	});
+
+	// ── DOM ───────────────────────────────────────────────────────────
+	const fig = document.querySelector<HTMLElement>("[data-fig]");
+	if (fig) init(fig);
+
+	function el<K extends keyof SVGElementTagNameMap>(
+		tag: K,
+		attrs: Record<string, string | number> = {},
+		parent?: Element,
+	) {
+		const e = document.createElementNS(NS, tag);
+		for (const k in attrs) e.setAttribute(k, String(attrs[k]));
+		parent?.appendChild(e);
+		return e;
+	}
+
+	function init(fig: HTMLElement) {
+		const svg = fig.querySelector<SVGSVGElement>("[data-svg]")!;
+		const gPanel = svg.querySelector("[data-panel]")!;
+		const gBed = svg.querySelector("[data-bed]")!;
+		const gKeys = svg.querySelector("[data-keys]")!;
+		const gPart = svg.querySelector("[data-particles]")!;
+		const stage = fig.querySelector<HTMLElement>("[data-stage]")!;
+		const statusEl = fig.querySelector<HTMLElement>("[data-status]")!;
+		const setBtns = fig.querySelectorAll<HTMLButtonElement>("[data-set]");
+		const soundBtn = fig.querySelector<HTMLButtonElement>("[data-sound]")!;
+		const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+		const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+		// viewBox from the projected extents of bed + panel
+		// panel top corners at both extremes (stand: tilt .42/h 5.2, display: tilt .16/h 6.2)
+		const top = (tl: number, h: number, x: number) => P(x, DEPTH + 1 + h * Math.sin(tl), h * Math.cos(tl) + 0.2);
+		const corners = [
+			P(-0.6, -0.6, -0.7), P(W + 0.6, -0.6, -0.7), P(W + 0.6, DEPTH + 0.6, 0), P(-0.6, DEPTH + 0.6, 0),
+			top(0.42, 5.2, 1), top(0.16, 6.2, 1), top(0.42, 5.2, W - 1), top(0.16, 6.2, W - 1),
+		];
+		const xs = corners.map((c) => c[0]);
+		const ys = corners.map((c) => c[1]);
+		const pad = 8;
+		const vb = [Math.min(...xs) - pad, Math.min(...ys) - pad, 0, 0];
+		vb[2] = Math.max(...xs) - vb[0] + pad;
+		vb[3] = Math.max(...ys) - vb[1] + pad;
+		svg.setAttribute("viewBox", vb.map((v) => v.toFixed(0)).join(" "));
+
+		// Bed (the instrument body)
+		const B = { x0: -0.6, y0: -0.6, x1: W + 0.6, y1: DEPTH + 0.6, z0: -0.7, z1: 0 };
+		el("polygon", { class: "wire", points: pts([P(B.x0, B.y0, B.z1), P(B.x1, B.y0, B.z1), P(B.x1, B.y1, B.z1), P(B.x0, B.y1, B.z1)]) }, gBed);
+		el("polygon", { class: "wire", points: pts([P(B.x0, B.y0, B.z1), P(B.x1, B.y0, B.z1), P(B.x1, B.y0, B.z0), P(B.x0, B.y0, B.z0)]) }, gBed);
+		el("polygon", { class: "wire", points: pts([P(B.x1, B.y0, B.z1), P(B.x1, B.y1, B.z1), P(B.x1, B.y1, B.z0), P(B.x1, B.y0, B.z0)]) }, gBed);
+		// a few caveman-style hatch marks on the body
+		for (const hx of [1.4, 6.2]) {
+			for (let j = 0; j < 3; j++) {
+				const a = P(hx + j * 0.18, B.y0, -0.15);
+				const b = P(hx + j * 0.18 + 0.12, B.y0, -0.5);
+				el("line", { class: "hatch", x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, gBed);
+			}
+		}
+		// Panel: music stand ⇄ display. Frame + two content layers.
+		const panelOuter = el("polygon", { class: "wire" }, gPanel);
+		const panelInner = el("polygon", { class: "wire wire-strong" }, gPanel);
+		const panelContent = el("g", {}, gPanel);
+		const pianoLayer = el("g", {}, panelContent);
+		const macLayer = el("g", {}, panelContent);
+		const PW = W - 2; // panel width (u)
+		const staffTop = 1.3;
+		const staffGap = 0.3;
+		for (let i = 0; i < 5; i++) {
+			el("line", { class: "staff", x1: 0.6, x2: PW - 0.6, y1: staffTop + i * staffGap, y2: staffTop + i * staffGap }, pianoLayer);
+		}
+		for (let i = 0; i < 5; i++) {
+			el("line", { class: "staff", x1: 0.6, x2: PW - 0.6, y1: staffTop + 2.1 + i * staffGap, y2: staffTop + 2.1 + i * staffGap }, pianoLayer);
+		}
+		const clef = el("text", { class: "ptxt dim", x: 0.7, y: 0.75, "font-size": 0.34 }, pianoLayer);
+		clef.textContent = "♩ = 96   op. 1 — for keys";
+		const notesG = el("g", {}, pianoLayer);
+		const termLines: SVGTextElement[] = [];
+		for (let i = 0; i < 6; i++) {
+			termLines.push(el("text", { class: "ptxt" + (i === 0 ? " dim" : i === 1 ? " acc" : ""), x: 0.7, y: 0.95 + i * 0.66, "font-size": 0.38 }, macLayer));
+		}
+
+		// Keys
+		const keys: Key[] = macSpecs.map((m, i) => {
+			const g = el("g", { class: "k", "data-i": i }, gKeys);
+			const polys = [el("polygon", { class: "side" }, g), el("polygon", { class: "side" }, g), el("polygon", { class: "top" }, g)];
+			const lbl = m.label ? el("text", { class: "lbl", "font-size": 0.3 }, g) : null;
+			if (lbl) lbl.textContent = m.label;
+			return { el: g, polys, lbl, mac: m.r, src: src[i], label: m.label, code: m.code, press: 0, hold: 0, z: 0 };
+		});
+		const byCode = new Map(keys.map((k, i) => [k.code, i]));
+
+		// ── State ─────────────────────────────────────────────────────
+		let mode: "auto" | 0 | 1 = "auto";
+		let t = 0; // morph 0 = piano, 1 = mac
+		let target = 0;
+		let hover: number | null = null;
+		let autoPhase = 0;
+		let visible = true;
+		let notesPlayed = 0;
+		let bytesOut = 0;
+		let typed = "";
+		const staffNotes: { midi: number; age: number }[] = [];
+		type Particle = { node: SVGTextElement; x: number; y: number; z: number; age: number };
+		const particles: Particle[] = [];
+
+		// ── Sound (Web Audio, opt-in) ─────────────────────────────────
+		let ac: AudioContext | null = null;
+		let master: GainNode | null = null;
+		function ensureAudio() {
+			if (ac) return;
+			ac = new AudioContext();
+			master = ac.createGain();
+			master.gain.value = 0.5;
+			const delay = ac.createDelay();
+			delay.delayTime.value = 0.28;
+			const fb = ac.createGain();
+			fb.gain.value = 0.28;
+			const wet = ac.createGain();
+			wet.gain.value = 0.22;
+			master.connect(ac.destination);
+			master.connect(delay);
+			delay.connect(fb).connect(delay);
+			delay.connect(wet).connect(ac.destination);
+		}
+		const hz = (midi: number) => 440 * Math.pow(2, (midi - 69) / 12);
+		function tone(midi: number, kind: "piano" | "byte") {
+			if (!ac || !master || soundBtn.getAttribute("aria-pressed") !== "true") return;
+			const now = ac.currentTime;
+			const g = ac.createGain();
+			const f = ac.createBiquadFilter();
+			f.type = "lowpass";
+			f.frequency.value = kind === "piano" ? 2400 : 1800;
+			g.connect(f).connect(master);
+			const o1 = ac.createOscillator();
+			const o2 = ac.createOscillator();
+			o1.type = kind === "piano" ? "triangle" : "square";
+			o2.type = "sine";
+			o1.frequency.value = hz(midi);
+			o2.frequency.value = hz(midi) * 2;
+			const g2 = ac.createGain();
+			g2.gain.value = kind === "piano" ? 0.25 : 0.1;
+			o1.connect(g);
+			o2.connect(g2).connect(g);
+			const peak = kind === "piano" ? 0.22 : 0.05;
+			const dur = kind === "piano" ? 1.6 : 0.18;
+			g.gain.setValueAtTime(0, now);
+			g.gain.linearRampToValueAtTime(peak, now + 0.008);
+			g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+			o1.start(now);
+			o2.start(now);
+			o1.stop(now + dur + 0.05);
+			o2.stop(now + dur + 0.05);
+		}
+		soundBtn.addEventListener("click", () => {
+			const on = soundBtn.getAttribute("aria-pressed") !== "true";
+			soundBtn.setAttribute("aria-pressed", String(on));
+			if (on) {
+				ensureAudio();
+				ac?.resume();
+			}
+		});
+
+		// ── Playing ───────────────────────────────────────────────────
+		const PENTA = [0, 2, 4, 7, 9];
+		const NOTE_NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+
+		function spawn(text: string, x: number, y: number, z: number) {
+			let p = particles.find((q) => q.age >= 1);
+			if (!p) {
+				if (particles.length > 40) return;
+				p = { node: el("text", { class: "particle", "font-size": 0.42 }, gPart), x, y, z, age: 0 };
+				particles.push(p);
+			}
+			Object.assign(p, { x, y, z, age: 0 });
+			p.node.textContent = text;
+		}
+
+		function pressPiano(pi: number, hold = 260) {
+			const p = piano[pi];
+			keys.forEach((k) => {
+				if (k.src === pi) {
+					k.press = 1;
+					k.hold = hold;
+				}
+			});
+			notesPlayed++;
+			staffNotes.push({ midi: p.midi, age: 0 });
+			if (staffNotes.length > 18) staffNotes.shift();
+			tone(p.midi, "piano");
+			const name = NOTE_NAMES[p.midi % 12] + Math.floor(p.midi / 12 - 1);
+			spawn(Math.random() < 0.5 ? (Math.random() < 0.5 ? "♪" : "♫") : name, cx(p), cy(p), p.h + 0.4);
+		}
+
+		function pressMac(mi: number, hold = 140) {
+			const k = keys[mi];
+			k.press = 1;
+			k.hold = hold;
+			const ch =
+				k.code === "Space" ? " " : k.label.length === 1 ? k.label.toLowerCase() : k.code === "Enter" ? "\n" : "";
+			if (ch === "\n") typed = "";
+			else if (k.code === "Backspace") typed = typed.slice(0, -1);
+			else typed = (typed + ch).slice(-64);
+			const byte = ch ? ch.charCodeAt(0) & 0xff : (k.code.length * 17) & 0xff;
+			bytesOut++;
+			// bytes → music: quantise each byte to a pentatonic note
+			const midi = 60 + Math.floor((byte % 15) / 5) * 12 + PENTA[byte % 5];
+			tone(midi, "byte");
+			const r = k.mac;
+			const txt = Math.random() < 0.6 ? "0x" + byte.toString(16).padStart(2, "0") : byte.toString(2).padStart(8, "0");
+			spawn(txt, cx(r), cy(r), r.h + 0.4);
+		}
+
+		function pressKey(mi: number) {
+			if (t < 0.5) pressPiano(keys[mi].src);
+			else pressMac(mi);
+		}
+
+		// Pointer: tap keys
+		gKeys.addEventListener("pointerdown", (e) => {
+			const g = (e.target as Element).closest<SVGGElement>(".k");
+			if (!g) return;
+			ensureAudio();
+			pressKey(Number(g.dataset.i));
+			lastHuman = performance.now();
+		});
+
+		// Physical keyboard while the figure is on screen
+		const PIANO_ROW = ["KeyA", "KeyW", "KeyS", "KeyE", "KeyD", "KeyF", "KeyT", "KeyG", "KeyY", "KeyH", "KeyU", "KeyJ", "KeyK", "KeyO", "KeyL", "KeyP", "Semicolon"];
+		let lastHuman = -1e9;
+		addEventListener("keydown", (e) => {
+			if (!visible || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+			const tgt = e.target as HTMLElement;
+			if (tgt.closest("input, textarea, select, [contenteditable]")) return;
+			if (tgt.closest("button, a") && (e.code === "Space" || e.code === "Enter")) return;
+			lastHuman = performance.now();
+			if (t < 0.5) {
+				const idx = PIANO_ROW.indexOf(e.code);
+				if (idx < 0) return;
+				const pi = pianoByMidi.get(60 + idx);
+				if (pi !== undefined) pressPiano(pi);
+			} else {
+				const mi = byCode.get(e.code);
+				if (mi !== undefined) pressMac(mi);
+			}
+		});
+
+		// Hover to scrub (fine pointers only; touch uses the chips)
+		if (finePointer) {
+			stage.addEventListener("pointermove", (e) => {
+				if (e.pointerType !== "mouse") return;
+				const r = stage.getBoundingClientRect();
+				hover = Math.min(1, Math.max(0, (e.clientX - r.left - r.width * 0.15) / (r.width * 0.7)));
+			});
+			stage.addEventListener("pointerleave", () => (hover = null));
+		}
+
+		function setMode(m: "auto" | 0 | 1) {
+			mode = m;
+			setBtns.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.set === String(m))));
+		}
+		setBtns.forEach((b) =>
+			b.addEventListener("click", () => setMode(b.dataset.set === "auto" ? "auto" : (Number(b.dataset.set) as 0 | 1))),
+		);
+		const forced = new URLSearchParams(location.search).get("fig");
+		if (forced === "keyboard" || forced === "piano") {
+			setMode(forced === "keyboard" ? 1 : 0);
+			t = target = forced === "keyboard" ? 1 : 0;
+		} else if (reduced) setMode(0);
+
+		// ── Autoplay scripts ──────────────────────────────────────────
+		// Am – F – C – G arpeggios, played gently.
+		const melody = [57, 60, 64, 69, 64, 60, 53, 57, 60, 65, 60, 57, 48, 52, 55, 60, 55, 52, 55, 59, 62, 67, 71, 67];
+		const phrases = ["hello, world", "keys -> bytes -> notes", "import music from 'piano'", "tokens: 1,024 / 128k", "def play(k): return bytes(k)"];
+		let melodyI = 0;
+		let phraseI = 0;
+		let charI = 0;
+		let nextAuto = 0;
+
+		function autoStep(now: number) {
+			if (reduced || now - lastHuman < 2500 || now < nextAuto) return;
+			if (t < 0.12) {
+				const pi = pianoByMidi.get(melody[melodyI++ % melody.length]);
+				if (pi !== undefined) pressPiano(pi, 220);
+				nextAuto = now + 300;
+			} else if (t > 0.88) {
+				const phrase = phrases[phraseI % phrases.length];
+				if (charI === 0) typed = "";
+				if (charI < phrase.length) {
+					const ch = phrase[charI++];
+					const code = ch === " " ? "Space" : /[a-z]/.test(ch) ? "Key" + ch.toUpperCase() : /[0-9]/.test(ch) ? "Digit" + ch : ({ ",": "Comma", ".": "Period", "/": "Slash", "-": "Minus", "'": "Quote", ";": "Semicolon", "=": "Equal" } as Record<string, string>)[ch];
+					const mi = code ? byCode.get(code) : undefined;
+					if (mi !== undefined) pressMac(mi, 110);
+					else typed = (typed + ch).slice(-64);
+					nextAuto = now + 70 + Math.random() * 90;
+				} else {
+					charI = 0;
+					phraseI++;
+					nextAuto = now + 1100;
+				}
+			}
+		}
+
+		// ── Render ────────────────────────────────────────────────────
+		const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+		const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+		const diatonic = (midi: number) => [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6][midi % 12] + 7 * Math.floor(midi / 12);
+		let lastOrder = "";
+
+		function render(dt: number) {
+			// panel: music stand (tilted, shorter) ⇄ display (upright, taller)
+			const tilt = lerp(0.42, 0.16, ease(t));
+			const ph = lerp(5.2, 6.2, ease(t));
+			const py = DEPTH + 1.0;
+			const vx = Math.sin(tilt);
+			const vz = Math.cos(tilt);
+			const corner = (u: number, v: number) => P(1 + u, py + v * vx, v * vz + 0.2);
+			panelOuter.setAttribute("points", pts([corner(0, 0), corner(PW, 0), corner(PW, ph), corner(0, ph)]));
+			panelInner.setAttribute("points", pts([corner(0.3, 0.3), corner(PW - 0.3, 0.3), corner(PW - 0.3, ph - 0.3), corner(0.3, ph - 0.3)]));
+			// content frame: u → x axis, w (down) → minus panel-up
+			const o = corner(0, ph);
+			const a = C30 * U, b = S30 * U;
+			const c = -vx * C30 * U, d = (vx * S30 + vz) * U;
+			panelContent.setAttribute("transform", `matrix(${a},${b},${c},${d},${o[0]},${o[1]})`);
+			pianoLayer.setAttribute("opacity", String(Math.max(0, 1 - t * 2)));
+			macLayer.setAttribute("opacity", String(Math.max(0, t * 2 - 1)));
+
+			// staff notes scroll in from the right
+			notesG.replaceChildren();
+			staffNotes.forEach((n, i) => {
+				n.age += dt;
+				const u = PW - 1.2 - (staffNotes.length - 1 - i) * 0.68;
+				if (u < 1.4) return;
+				const treble = n.midi >= 60;
+				const step = diatonic(n.midi);
+				const ref = diatonic(treble ? 64 : 43); // bottom line: E4 (treble) / G2 (bass)
+				const base = treble ? staffTop + 4 * staffGap : staffTop + 2.1 + 4 * staffGap;
+				const w = base - (step - ref) * (staffGap / 2);
+				el("ellipse", { class: "note", cx: u, cy: w, rx: 0.2, ry: 0.14, transform: `rotate(-20 ${u} ${w})` }, notesG);
+				el("line", { class: "staff", x1: u + 0.18, x2: u + 0.18, y1: w, y2: w - 0.8 }, notesG);
+			});
+
+			// terminal
+			const hex = [...typed.slice(-12)].map((ch) => ch.charCodeAt(0).toString(16).padStart(2, "0")).join(" ");
+			const toks = typed.split(/(\s+|[,.'/;=-])/).filter((s) => s && s.trim()).slice(-5);
+			const cursor = Math.floor(performance.now() / 500) % 2 ? "▍" : " ";
+			const lines = [
+				"~/keys — zsh",
+				"$ " + typed.slice(-36) + cursor,
+				"bytes   " + (hex || "—"),
+				"tokens  " + (toks.map((s) => "[" + s + "]").join(" ") || "—"),
+				"notes   " + [...typed.slice(-8)].map((ch) => { const by = ch.charCodeAt(0); return NOTE_NAMES[PENTA[by % 5]]; }).join(" "),
+				`out     ${bytesOut} bytes · ${notesPlayed} notes`,
+			];
+			termLines.forEach((ln, i) => (ln.textContent = lines[i]));
+
+			// keys
+			for (let i = 0; i < keys.length; i++) {
+				const k = keys[i];
+				const p = piano[k.src];
+				// stagger the morph left → right for a wave
+				const lt = ease(Math.min(1, Math.max(0, t * 1.5 - (cx(k.mac) / W) * 0.5)));
+				const r = {
+					x: lerp(p.x, k.mac.x, lt),
+					y: lerp(p.y, k.mac.y, lt),
+					w: lerp(p.w, k.mac.w, lt),
+					d: lerp(p.d, k.mac.d, lt),
+					h: lerp(p.h, k.mac.h, lt),
+				};
+				if (k.hold > 0) k.hold -= dt * 1000;
+				else k.press = Math.max(0, k.press - dt * 6);
+				const z = r.h * (1 - 0.55 * k.press);
+				k.z = z;
+				const x0 = r.x, x1 = r.x + r.w, y0 = r.y, y1 = r.y + r.d;
+				k.polys[0].setAttribute("points", pts([P(x0, y0, z), P(x1, y0, z), P(x1, y0, 0), P(x0, y0, 0)]));
+				k.polys[1].setAttribute("points", pts([P(x1, y0, z), P(x1, y1, z), P(x1, y1, 0), P(x1, y0, 0)]));
+				k.polys[2].setAttribute("points", pts([P(x0, y0, z), P(x1, y0, z), P(x1, y1, z), P(x0, y1, z)]));
+				k.el.classList.toggle("on", k.press > 0.3);
+				if (k.lbl) {
+					const lo = P(x0 + 0.14, y0 + 0.2, z);
+					k.lbl.setAttribute("transform", `matrix(${C30 * U},${S30 * U},${-C30 * U},${S30 * U},${lo[0]},${lo[1]})`);
+					k.lbl.setAttribute("opacity", String(Math.max(0, lt * 1.6 - 0.6)));
+				}
+			}
+			// painter's order: lower tops first, then back-to-front
+			const order = keys
+				.map((k, i) => i)
+				.sort((i, j) => {
+					const a = keys[i], b = keys[j];
+					const ra = piano[a.src].black && t < 0.5 ? 1 : 0;
+					const rb = piano[b.src].black && t < 0.5 ? 1 : 0;
+					if (ra !== rb) return ra - rb;
+					const ay = t < 0.5 ? piano[a.src].y : a.mac.y;
+					const by = t < 0.5 ? piano[b.src].y : b.mac.y;
+					if (ay !== by) return by - ay;
+					return (t < 0.5 ? piano[a.src].x - piano[b.src].x : a.mac.x - b.mac.x) || i - j;
+				});
+			const sig = order.join(",");
+			if (sig !== lastOrder) {
+				lastOrder = sig;
+				for (const i of order) gKeys.appendChild(keys[i].el);
+			}
+
+			// particles rise and fade
+			for (const q of particles) {
+				if (q.age >= 1) {
+					q.node.setAttribute("opacity", "0");
+					continue;
+				}
+				q.age = Math.min(1, q.age + dt / 1.8);
+				const z = q.z + q.age * 3.2;
+				const s = P(q.x - 0.3, q.y, z);
+				q.node.setAttribute("transform", `matrix(${C30 * U},${S30 * U},0,${U},${s[0]},${s[1]})`);
+				q.node.setAttribute("opacity", String((1 - q.age) * Math.min(1, q.age * 8)));
+			}
+
+			statusEl.textContent = t < 0.5
+				? `♪ ${notesPlayed.toLocaleString("en")} notes`
+				: `0x ${bytesOut.toLocaleString("en")} bytes`;
+		}
+
+		// ── Loop ──────────────────────────────────────────────────────
+		let last = performance.now();
+		let raf = 0;
+		function frame(now: number) {
+			const dt = Math.min(0.05, (now - last) / 1000);
+			last = now;
+			if (hover !== null) target = hover;
+			else if (mode === "auto") {
+				autoPhase += dt;
+				// 7s piano · 2s morph · 7s keyboard · 2s morph
+				const cyc = autoPhase % 18;
+				target = cyc < 7 ? 0 : cyc < 9 ? (cyc - 7) / 2 : cyc < 16 ? 1 : 1 - (cyc - 16) / 2;
+			} else target = mode;
+			t += (target - t) * Math.min(1, dt * (hover !== null ? 8 : 5));
+			if (Math.abs(target - t) < 0.0005) t = target;
+			autoStep(now);
+			render(dt);
+			raf = visible && !document.hidden ? requestAnimationFrame(frame) : 0;
+		}
+		function wake() {
+			if (!raf && visible && !document.hidden) {
+				last = performance.now();
+				raf = requestAnimationFrame(frame);
+			}
+		}
+		new IntersectionObserver(([e]) => {
+			visible = e.isIntersecting;
+			wake();
+		}).observe(fig);
+		document.addEventListener("visibilitychange", wake);
+		render(0);
+		wake();
+	}
+</script>

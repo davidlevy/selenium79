@@ -1,0 +1,61 @@
+/*
+  Calm slate-blue theme. Dark-first (deep blue-grey, soft ice-blue accent),
+  with a matching pale light mode. Geist for text, Geist Mono for labels.
+*/
+
+:root {
+	--color-bg: light-dark(#f4f6f9, #141a23);
+	--color-surface: light-dark(#ffffff, #1c2430);
+	--color-text: light-dark(#18202b, #e4e9f0);
+	--color-muted: light-dark(#5d6a7c, #8693a6);
+	--color-border: light-dark(#dde2ea, #263040);
+	--color-brand: light-dark(#2f6fa8, #99d3ff); /* LangChain/LangGraph sky blue — the single accent */
+	--color-on-brand: light-dark(#ffffff, #0b1220);
+	--color-line: light-dark(#8592a5, #6d7b90); /* wireframe strokes */
+	--color-line-strong: light-dark(#2a3442, #cfd8e3);
+
+	--font-body: var(--font-heading);
+	--font-weight-heading: 400;
+	--font-weight-display: 300;
+	--tracking-tight: -0.035em;
+	--tracking-wide: 0.12em;
+
+	--font-size-4xl: clamp(2.5rem, 1.6rem + 4.2vw, 4.75rem);
+	--font-size-3xl: clamp(2rem, 1.5rem + 2.4vw, 3rem);
+	--radius: 10px;
+	--wide-width: 1280px;
+}
+
+/* Browsers without light-dark(): light palette */
+@supports not (color: light-dark(#000, #fff)) {
+	:root {
+		--color-bg: #f4f6f9;
+		--color-surface: #ffffff;
+		--color-text: #18202b;
+		--color-muted: #5d6a7c;
+		--color-border: #dde2ea;
+		--color-brand: #2f6fa8;
+		--color-on-brand: #ffffff;
+		--color-line: #8592a5;
+		--color-line-strong: #2a3442;
+	}
+}
+
+/* Default to dark when the visitor's OS has no say (keeps the calm look). */
+@media (prefers-color-scheme: no-preference) {
+	:root:not(.light) {
+		color-scheme: dark;
+	}
+}
+
+::selection {
+	background: color-mix(in srgb, var(--color-brand) 30%, transparent);
+}
+
+.mono {
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: var(--font-size-xs);
+	letter-spacing: var(--tracking-wide);
+	text-transform: uppercase;
+	color: var(--color-muted);
+}

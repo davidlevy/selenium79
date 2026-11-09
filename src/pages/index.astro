@@ -1,0 +1,570 @@
+---
+import { getEmDashCollection, getEmDashEntry, getSiteSettings } from "emdash";
+import { PortableText } from "emdash/ui";
+import Base from "../layouts/Base.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import HeroKeys from "../components/HeroKeys.astro";
+import SocialButtons from "../components/SocialButtons.astro";
+import Arrow from "../components/Arrow.astro";
+import YouTube from "../components/YouTube.astro";
+import { profile } from "../profile";
+
+const [settings, projectsResult, experienceResult, aboutResult, musicResult] = await Promise.all([
+	getSiteSettings(),
+	getEmDashCollection("projects", { orderBy: { published_at: "asc" }, limit: 6 }),
+	getEmDashCollection("experience", { limit: 20 }),
+	getEmDashEntry("pages", "about"),
+	getEmDashCollection("music", { limit: 50 }),
+]);
+if (projectsResult.error || experienceResult.error || aboutResult.error || musicResult.error) {
+	return new Response("Could not load the site", { status: 500 });
+}
+if (Astro.cache?.enabled) {
+	Astro.cache.set(projectsResult.cacheHint);
+	Astro.cache.set(experienceResult.cacheHint);
+	Astro.cache.set(aboutResult.cacheHint);
+	Astro.cache.set(musicResult.cacheHint);
+}
+const about = aboutResult.entry;
+const tracks = [...musicResult.entries].sort((a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99));
+const soundcloudPlayer = `https://w.soundcloud.com/player/?url=${encodeURIComponent(profile.soundcloud)}&color=%2399d3ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=false`;
+const projects = projectsResult.entries;
+const roles = [...experienceResult.entries].sort(
+	(a, b) => (a.data.sort ?? 99) - (b.data.sort ?? 99),
+);
+const name = settings?.title || "Your Name";
+const linkedin = settings?.social?.linkedin;
+const github = settings?.social?.github;
+---
+
+<Base>
+	<div class="hero wrap">
+	<section class="intro">
+		<p class="mono intro-eyebrow">
+			<span class="pulse" aria-hidden="true"></span>{profile.availability}
+		</p>
+		<h1 class="intro-name">{name}</h1>
+		<p class="intro-lede">{profile.lede}</p>
+		<div class="intro-actions">
+			<SocialButtons linkedin={linkedin} github={github} email={profile.email} />
+		</div>
+	</section>
+
+	<div class="hero-fig">
+		<HeroKeys />
+	</div>
+	</div>
+
+	{
+		roles.length > 0 && (
+			<section id="experience" class="wrap section">
+				<header class="section-head framed">
+					<span class="mono">01</span>
+					<h2>Experience</h2>
+				</header>
+				<ol class="roles cells">
+					{roles.map((r) => (
+						<li class="role">
+							<div class="role-top">
+								{r.data.logo ? (
+									<img class="role-logo" src={r.data.logo} alt={r.data.company} loading="lazy" />
+								) : (
+									<span class="role-logo-text">{r.data.company}</span>
+								)}
+								<span class="role-when mono">{r.data.period}</span>
+							</div>
+							<div class="role-body">
+								<h3 class="role-title" {...r.edit.title}>{r.data.title}</h3>
+								<p class="role-at">
+									{r.data.company_url ? (
+										<a href={r.data.company_url} target="_blank" rel="noopener noreferrer">
+											{r.data.company} <Arrow />
+										</a>
+									) : (
+										<span {...r.edit.company}>{r.data.company}</span>
+									)}
+									{r.data.location && <span class="role-where"> · {r.data.location}</span>}
+								</p>
+							</div>
+							{r.data.stack && <p class="role-stack mono" {...r.edit.stack}>{r.data.stack}</p>}
+						</li>
+					))}
+				</ol>
+			</section>
+		)
+	}
+
+	{
+		projects.length > 0 && (
+			<section id="work" class="wrap section">
+				<header class="section-head framed">
+					<span class="mono">02</span>
+					<h2>Personal projects</h2>
+				</header>
+				<div class="grid cells">
+					{projects.map((p) => (
+						<ProjectCard
+							title={p.data.title}
+							summary={p.data.summary}
+							featuredImage={p.data.featured_image}
+							href={p.data.url || undefined}
+							client={p.data.client}
+							year={p.data.year}
+							video={p.data.video}
+							edit={p.edit}
+						/>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	<section id="music" class="wrap section">
+		<header class="section-head framed music-head">
+			<span class="mono">03</span>
+			<h2>Music</h2>
+			<p class="music-sub">Piano, melodica &amp; improvisation</p>
+			<SocialButtons soundcloud={profile.soundcloud} />
+		</header>
+		<div class="cells music">
+			<div class="sc-cell">
+				<iframe
+					title="David Levy on SoundCloud"
+					src={soundcloudPlayer}
+					loading="lazy"
+					allow="autoplay; encrypted-media"
+					scrolling="no"
+				></iframe>
+			</div>
+			{tracks.map((t, i) => (
+				<figure class:list={["track", { featured: i === 0 }]}>
+					<YouTube url={t.data.video} title={t.data.title} />
+					<figcaption>
+						<span class="track-title" {...t.edit.title}>{t.data.title}</span>
+						{t.data.note && <span class="track-note mono">{t.data.note}</span>}
+					</figcaption>
+				</figure>
+			))}
+		</div>
+	</section>
+
+	<section id="about" class="wrap section">
+		<header class="section-head">
+			<span class="mono">04</span>
+			<h2>About</h2>
+		</header>
+		<div class="about">
+			<div class="about-text" {...about?.edit.content}>
+				{about?.data.content && <PortableText value={about.data.content} />}
+			</div>
+			<aside>
+				<p class="mono about-label">Toolkit</p>
+				<ul class="skills">
+					{profile.skills.map((s) => <li>{s}</li>)}
+				</ul>
+			</aside>
+		</div>
+	</section>
+
+	<section id="contact" class="wrap section cta">
+		<p class="mono">05 · Contact</p>
+		<h2 class="cta-title">Let’s talk.</h2>
+		<p class="cta-sub">The quickest way to reach me is LinkedIn.</p>
+		<div class="intro-actions">
+			<SocialButtons linkedin={linkedin} github={github} email={profile.email} center />
+		</div>
+	</section>
+</Base>
+
+<style>
+	.wrap {
+		max-width: var(--wide-width);
+		margin-inline: auto;
+		padding-inline: clamp(1rem, 4vw, var(--spacing-lg));
+	}
+
+	.intro {
+		padding-block: clamp(1.5rem, 5vh, var(--spacing-3xl)) clamp(1.25rem, 3vh, var(--spacing-xl));
+	}
+
+	.intro-eyebrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin-bottom: var(--spacing-md);
+	}
+
+	.pulse {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: var(--color-brand);
+		box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-brand) 50%, transparent);
+		animation: pulse 2.4s ease-out infinite;
+	}
+
+	@keyframes pulse {
+		to {
+			box-shadow: 0 0 0 10px transparent;
+		}
+	}
+
+	.intro-name {
+		font-size: var(--font-size-4xl);
+		font-weight: var(--font-weight-display);
+		letter-spacing: var(--tracking-tight);
+		line-height: var(--leading-tight);
+	}
+
+	.intro-lede {
+		margin-top: var(--spacing-md);
+		max-width: 38rem;
+		color: var(--color-muted);
+		line-height: var(--leading-relaxed);
+	}
+
+	.intro-actions {
+		margin-top: var(--spacing-lg);
+	}
+
+	@media (min-width: 1024px) {
+		.hero {
+			display: grid;
+			grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
+			align-items: center;
+			gap: var(--spacing-xl);
+			min-height: calc(100svh - 4.5rem);
+			padding-block: var(--spacing-xl);
+		}
+
+		.hero .intro {
+			padding-block: 0;
+		}
+
+		.hero .intro-name {
+			font-size: clamp(3rem, 1rem + 3.4vw, 4.5rem);
+		}
+
+		.hero-fig {
+			margin-bottom: 0;
+		}
+
+		.hero-fig :global(.fig-svg) {
+			max-height: min(76svh, 760px);
+		}
+	}
+
+	.hero-fig {
+		margin-bottom: clamp(2rem, 6vw, var(--spacing-3xl));
+	}
+
+	.section {
+		padding-block: clamp(2rem, 6vw, var(--spacing-3xl));
+	}
+
+	.section-head {
+		display: flex;
+		align-items: baseline;
+		gap: var(--spacing-md);
+		margin-bottom: var(--spacing-xl);
+	}
+
+	/* Header cell on top of a grid: the grid itself is the section frame */
+	.section-head.framed {
+		margin-bottom: 0;
+		padding: var(--spacing-md) var(--spacing-lg);
+		border: 1px solid var(--color-border);
+		border-bottom: 0;
+	}
+
+	/* Hairline grid: borders shared between cells (LangGraph-style) */
+	.cells {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+		border-top: 1px solid var(--color-border);
+		border-left: 1px solid var(--color-border);
+	}
+
+	.cells > :global(*) {
+		border-right: 1px solid var(--color-border);
+		border-bottom: 1px solid var(--color-border);
+		padding: var(--spacing-lg);
+		transition: background var(--transition-base);
+	}
+
+	.cells > :global(*:hover) {
+		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+	}
+
+	.section-head .mono {
+		color: var(--color-brand);
+	}
+
+	.section-head h2 {
+		font-size: var(--font-size-xl);
+		font-weight: 400;
+		letter-spacing: -0.02em;
+	}
+
+	.section-link {
+		margin-left: auto;
+		text-decoration: none;
+	}
+
+	.section-link:hover {
+		color: var(--color-text);
+	}
+
+	/* LangChain-style grid: hairline borders shared between cells */
+	.roles {
+		list-style: none;
+	}
+
+	.role {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-lg);
+		min-height: 13.5rem;
+	}
+
+	.role-top {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--spacing-md);
+		min-height: 2.5rem;
+	}
+
+	/* Company logos rendered as single-colour marks: white in dark, ink in light */
+	.role-logo {
+		height: 1.5rem;
+		width: auto;
+		max-width: 8.5rem;
+		object-fit: contain;
+		object-position: left center;
+		filter: brightness(0) invert(1);
+		opacity: 0.9;
+	}
+
+	/* square-ish marks need more height to read at the same weight */
+	.role-logo[src$="01edu.png"] {
+		height: 2.5rem;
+	}
+
+	@media (prefers-color-scheme: light) {
+		:global(:root:not(.dark)) .role-logo {
+			filter: brightness(0);
+			opacity: 0.85;
+		}
+	}
+
+	:global(:root.light) .role-logo {
+		filter: brightness(0);
+		opacity: 0.85;
+	}
+
+	.role-logo-text {
+		font-size: 1.05rem;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		line-height: 1.5rem;
+	}
+
+	.role-when {
+		text-transform: none;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+		font-size: 0.68rem;
+		padding-top: 0.2rem;
+	}
+
+	.role-title {
+		font-size: var(--font-size-base);
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		line-height: 1.35;
+	}
+
+	.role-at {
+		margin-top: 0.25rem;
+		font-size: var(--font-size-sm);
+		color: var(--color-muted);
+	}
+
+	.role-at a {
+		text-decoration: none;
+		color: var(--color-text);
+		transition: color var(--transition-fast);
+	}
+
+	.role-at a:hover {
+		color: var(--color-brand);
+	}
+
+	.role-stack {
+		margin-top: auto;
+		padding-top: var(--spacing-sm);
+		border-top: 1px dashed var(--color-border);
+		font-size: 0.66rem;
+		text-transform: none;
+		letter-spacing: 0.04em;
+		line-height: 1.6;
+	}
+
+
+	.skills {
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-sm);
+	}
+
+	.skills li {
+		font-family: var(--font-mono), ui-monospace, monospace;
+		font-size: var(--font-size-sm);
+		padding: 0.4rem 0.85rem;
+		border: 1px solid color-mix(in srgb, var(--color-brand) 30%, var(--color-border));
+		background: color-mix(in srgb, var(--color-brand) 7%, transparent);
+		border-radius: 999px;
+		color: var(--color-text);
+	}
+
+	.cta {
+		text-align: center;
+		padding-bottom: clamp(3rem, 8vw, var(--spacing-4xl));
+	}
+
+	.cta > .mono {
+		color: var(--color-brand);
+	}
+
+	.cta-title {
+		margin-top: var(--spacing-md);
+		font-size: var(--font-size-3xl);
+		font-weight: 300;
+		letter-spacing: var(--tracking-tight);
+	}
+
+	.cta-sub {
+		margin-top: var(--spacing-sm);
+		color: var(--color-muted);
+	}
+
+	.music-head {
+		flex-wrap: wrap;
+		align-items: center;
+	}
+
+	.music-sub {
+		color: var(--color-muted);
+		font-size: var(--font-size-sm);
+	}
+
+	.music-head :global(.social) {
+		margin-left: auto;
+	}
+
+	.music-head :global(.sbtn) {
+		min-height: 2.25rem;
+		padding-block: 0.4rem;
+	}
+
+	/* 1 featured (2×2) + 12 videos = 16 slots: fills 4, 2 or 1 columns with no gaps */
+	.music {
+		grid-template-columns: 1fr;
+	}
+
+	@media (min-width: 560px) {
+		.music {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.track.featured {
+			grid-column: span 2;
+		}
+	}
+
+	@media (min-width: 1100px) {
+		.music {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+
+		.track.featured {
+			grid-row: span 2;
+		}
+	}
+
+	.track.featured :global(.yt) {
+		flex: 1;
+		aspect-ratio: auto !important;
+		min-height: 14rem;
+	}
+
+	.sc-cell {
+		grid-column: 1 / -1;
+	}
+
+	.sc-cell iframe {
+		display: block;
+		width: 100%;
+		height: 300px;
+		border: 0;
+		border-radius: 6px;
+	}
+
+	.track {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+
+	.track figcaption {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+	}
+
+	.track-title {
+		font-weight: 500;
+		letter-spacing: -0.01em;
+	}
+
+	.track-note {
+		font-size: 0.66rem;
+		text-transform: none;
+		letter-spacing: 0.04em;
+	}
+
+	.about {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+		gap: clamp(2rem, 5vw, var(--spacing-3xl));
+	}
+
+	.about-text {
+		max-width: 42rem;
+		line-height: var(--leading-relaxed);
+	}
+
+	.about-text :global(p) {
+		margin-bottom: 1.1em;
+	}
+
+	.about-text :global(h2) {
+		font-size: var(--font-size-lg);
+		font-weight: 500;
+		margin: 1.8em 0 0.5em;
+	}
+
+	.about-label {
+		margin-bottom: var(--spacing-md);
+	}
+
+	@media (max-width: 720px) {
+		.about {
+			grid-template-columns: 1fr;
+		}
+
+	}
+
+</style>

@@ -1,0 +1,746 @@
+{
+	"$schema": "https://emdashcms.com/seed.schema.json",
+	"version": "1",
+	"meta": {
+		"name": "Personal site",
+		"description": "Personal site and résumé",
+		"author": "David Lavy"
+	},
+	"settings": {
+		"title": "David Lavy",
+		"tagline": "Hands-on engineering lead — React, Node, TypeScript, Python. 25 years shipping products with distributed teams.",
+		"social": {
+			"linkedin": "https://www.linkedin.com/in/davidlevy",
+			"github": "https://github.com/davidlevy"
+		}
+	},
+	"collections": [
+		{
+			"slug": "projects",
+			"label": "Projects",
+			"labelSingular": "Project",
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"search",
+				"seo"
+			],
+			"urlPattern": "/work/{slug}",
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "featured_image",
+					"label": "Featured Image",
+					"type": "image",
+					"required": false
+				},
+				{
+					"slug": "client",
+					"label": "Client",
+					"type": "string"
+				},
+				{
+					"slug": "year",
+					"label": "Year",
+					"type": "string"
+				},
+				{
+					"slug": "summary",
+					"label": "Summary",
+					"type": "text",
+					"searchable": true
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText",
+					"searchable": true
+				},
+				{
+					"slug": "gallery",
+					"label": "Gallery",
+					"type": "repeater",
+					"validation": {
+						"maxItems": 24,
+						"subFields": [
+							{
+								"slug": "image",
+								"label": "Image",
+								"type": "image",
+								"required": true
+							},
+							{
+								"slug": "caption",
+								"label": "Caption",
+								"type": "text"
+							}
+						]
+					}
+				},
+				{
+					"slug": "url",
+					"label": "Project URL",
+					"type": "url"
+				},
+				{
+					"slug": "video",
+					"label": "Video URL (YouTube)",
+					"type": "string"
+				}
+			]
+		},
+		{
+			"slug": "pages",
+			"label": "Pages",
+			"labelSingular": "Page",
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"search",
+				"seo"
+			],
+			"urlPattern": "/{slug}",
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText",
+					"searchable": true
+				}
+			]
+		},
+		{
+			"slug": "experience",
+			"label": "Experience",
+			"labelSingular": "Role",
+			"supports": [
+				"drafts",
+				"revisions"
+			],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Role",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "company",
+					"label": "Company",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "company_url",
+					"label": "Company URL",
+					"type": "url"
+				},
+				{
+					"slug": "period",
+					"label": "Period",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "location",
+					"label": "Location",
+					"type": "string"
+				},
+				{
+					"slug": "summary",
+					"label": "Summary",
+					"type": "text"
+				},
+				{
+					"slug": "highlights",
+					"label": "Highlights (one per line)",
+					"type": "text"
+				},
+				{
+					"slug": "sort",
+					"label": "Sort order (lower = first)",
+					"type": "integer"
+				},
+				{
+					"slug": "logo",
+					"label": "Logo path (e.g. /logos/veepee.svg)",
+					"type": "string"
+				},
+				{
+					"slug": "stack",
+					"label": "Stack (short, e.g. TypeScript · React · AWS)",
+					"type": "string"
+				}
+			]
+		},
+		{
+			"slug": "music",
+			"label": "Music",
+			"labelSingular": "Track",
+			"supports": [
+				"drafts",
+				"revisions"
+			],
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "video",
+					"label": "YouTube URL",
+					"type": "string",
+					"required": true
+				},
+				{
+					"slug": "note",
+					"label": "Note (e.g. Live · Tel Aviv · 2009)",
+					"type": "string"
+				},
+				{
+					"slug": "sort",
+					"label": "Sort order (lower = first)",
+					"type": "integer"
+				}
+			]
+		}
+	],
+	"taxonomies": [
+		{
+			"name": "tag",
+			"label": "Tags",
+			"labelSingular": "Tag",
+			"hierarchical": false,
+			"collections": [
+				"projects"
+			],
+			"terms": [
+				{
+					"slug": "ai",
+					"label": "AI"
+				},
+				{
+					"slug": "audio",
+					"label": "Audio"
+				},
+				{
+					"slug": "web",
+					"label": "Web"
+				},
+				{
+					"slug": "tooling",
+					"label": "Tooling"
+				},
+				{
+					"slug": "open-source",
+					"label": "Open source"
+				}
+			]
+		}
+	],
+	"menus": [
+		{
+			"name": "primary",
+			"label": "Primary Navigation",
+			"items": [
+				{
+					"type": "custom",
+					"label": "Experience",
+					"url": "/#experience"
+				},
+				{
+					"type": "custom",
+					"label": "Work",
+					"url": "/#work"
+				},
+				{
+					"type": "custom",
+					"label": "About",
+					"url": "/#about"
+				},
+				{
+					"type": "custom",
+					"label": "Contact",
+					"url": "/#contact"
+				}
+			]
+		}
+	],
+	"content": {
+		"pages": [
+			{
+				"id": "about",
+				"slug": "about",
+				"status": "published",
+				"data": {
+					"title": "About",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s0",
+									"text": "I'm a hands-on engineering lead with 25 years of building for the web and mobile. I own architecture and delivery across React, Node, TypeScript and Python, with a sharp eye for UI/UX, robustness and business impact."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b1",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s1",
+									"text": "I've hired, grown and mentored distributed teams across Israel, France, Spain, Portugal and Vietnam — most recently leading them into agentic SDLC practices with Claude Code and Cursor, without lowering the bar on quality."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b2",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s2",
+									"text": "Before the keyboard there was the piano. I still improvise and compose — both reward practice, timing, and listening before you play."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "b3",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s3",
+									"text": "Beyond code"
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b4",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s4",
+									"text": "Piano (improvisation & composition) · Ecology, sustainability & low-tech · UI/UX and industrial design."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "b5",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s5",
+									"text": "Education"
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b6",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s6",
+									"text": "Computer Science Engineer — IMAC Engineering School, Paris (2002). Classes préparatoires PSI* — Lycée Jean-Baptiste Say, Paris."
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"_key": "b7",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s7",
+									"text": "Languages"
+								}
+							]
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b8",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s8",
+									"text": "French (native) · English (fluent) · Hebrew (fluent) · Spanish & Russian (elementary)."
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"projects": [
+			{
+				"id": "project-three",
+				"slug": "project-three",
+				"status": "published",
+				"data": {
+					"title": "milon.tech",
+					"client": "milon.tech",
+					"summary": "A Hebrew–English–\"Heblish\" glossary of Israeli high-tech jargon, with LLM-ready exports (JSON, TOON, llms.txt).",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s0",
+									"text": "A Hebrew–English–\"Heblish\" glossary of Israeli high-tech jargon, with LLM-ready exports (JSON, TOON, llms.txt)."
+								}
+							]
+						}
+					],
+					"url": "https://milontech.vercel.app/"
+				}
+			},
+			{
+				"id": "project-two",
+				"slug": "project-two",
+				"status": "published",
+				"data": {
+					"title": "SoundTrust",
+					"client": "soundtrust.live",
+					"summary": "Hearing-protection awareness for live events: a live sound meter, audio simulations, anonymous “too loud” signals to the DJ and a certification tag for organisers.",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s0",
+									"text": "Hearing-protection awareness for live events: a live sound meter, audio simulations, anonymous “too loud” signals to the DJ and a certification tag for organisers."
+								}
+							]
+						}
+					],
+					"url": "https://soundtrust.live"
+				}
+			},
+			{
+				"id": "project-one",
+				"slug": "project-one",
+				"status": "published",
+				"data": {
+					"title": "Linescape",
+					"client": "linescape.dev",
+					"summary": "Engineering-team observability: a 3D isometric view over GitHub data that lets engineering managers spot review bottlenecks at a glance — built for the agentic-SDLC era.",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"_key": "b0",
+							"children": [
+								{
+									"_type": "span",
+									"_key": "s0",
+									"text": "Engineering-team observability: a 3D isometric view over GitHub data that lets engineering managers spot review bottlenecks at a glance — built for the agentic-SDLC era."
+								}
+							]
+						}
+					],
+					"url": "https://linescape.dev",
+					"video": "https://www.youtube.com/watch?v=9EUy7bx-grU"
+				}
+			}
+		],
+		"experience": [
+			{
+				"id": "role-libertify",
+				"slug": "role-libertify",
+				"status": "published",
+				"data": {
+					"title": "Director of R&D / Frontend Tech Lead",
+					"company": "Libertify",
+					"company_url": "https://www.libertify.com",
+					"period": "May 2022 – Jun 2026",
+					"location": "Israel / France · Remote",
+					"summary": "Hands-on R&D lead for a SaaS platform for regulated industries that turns business documents into AI-guided video walkthroughs, interactive documents and AI assistants.",
+					"highlights": "Grew a remote team from 2 to 7 (Israel / Spain) and owned frontend architecture and delivery\nDrove adoption of AI-assisted development (Cursor, Claude Code) and CI/CD\nLed 0-to-1 architecture of the React / Next.js SaaS platform\nLed a contractor team building a React Native app with on-chain vaults\nDesigned the CRM & analytics pipeline (Segment, Mixpanel, HubSpot, Stripe, BigQuery)",
+					"sort": 1,
+					"logo": "/logos/libertify.png",
+					"stack": "React · Next.js · React Native · TypeScript · AWS"
+				}
+			},
+			{
+				"id": "role-01edu",
+				"slug": "role-01edu",
+				"status": "published",
+				"data": {
+					"title": "Senior Full-Stack Engineer · part-time",
+					"company": "01Edu",
+					"company_url": "https://01edu.ai",
+					"period": "Jan 2022 – May 2025",
+					"location": "Israel · Remote (Portugal)",
+					"summary": "Peer-to-peer, project-based computer-science learning platform.",
+					"highlights": "Reviewed high-complexity PRs and mentored 8 junior developers (Portugal / France)\nEstablished code-review standards",
+					"sort": 2,
+					"logo": "/logos/01edu.png",
+					"stack": "React · Hasura · GraphQL · Node.js · Postgres"
+				}
+			},
+			{
+				"id": "role-current",
+				"slug": "role-current",
+				"status": "published",
+				"data": {
+					"title": "Senior Frontend Developer",
+					"company": "Veepee",
+					"company_url": "https://www.veepee.com",
+					"period": "2011 – 2020",
+					"location": "Israel · Remote (France)",
+					"summary": "Veepee (ex Vente-Privée) e-commerce mobile web app — 20M+ users.",
+					"highlights": "Built the mobile web app from scratch, then migrated it to React / Redux / Saga / Next.js over GraphQL\nManaged a remote team of 2–5 developers and a dedicated Linux web cluster",
+					"sort": 3,
+					"logo": "/logos/veepee.svg",
+					"stack": "React · Redux · Next.js · GraphQL · Marionette.js"
+				}
+			},
+			{
+				"id": "role-atid",
+				"slug": "role-atid",
+				"status": "draft",
+				"data": {
+					"title": "CTO (hands-on)",
+					"company": "Atid Wire Banking",
+					"period": "Feb 2021 – Oct 2021",
+					"location": "Israel",
+					"summary": "White-label multi-tenant B2B digital wallet for banks and enterprises.",
+					"highlights": "Led a 3-developer contractor team, owning architecture and delivery\nFinalised the MVP, POCs and client demos\nBuilt the serverless Node.js / TypeScript backend on AWS Lambda and GraphQL",
+					"sort": 3,
+					"stack": "React Native · Node.js · AWS Lambda · GraphQL · DynamoDB"
+				}
+			},
+			{
+				"id": "role-previous",
+				"slug": "role-previous",
+				"status": "published",
+				"data": {
+					"title": "Project Director",
+					"company": "MatchesFashion",
+					"company_url": "https://www.matches.com",
+					"period": "2011 – 2020",
+					"location": "Israel · Remote (UK)",
+					"summary": "Global luxury e-commerce platform.",
+					"highlights": "Architected the native Android app and led a team of 2 developers",
+					"sort": 4,
+					"logo": "/logos/matches.svg",
+					"stack": "Java · Android"
+				}
+			},
+			{
+				"id": "role-earlier",
+				"slug": "role-earlier",
+				"status": "published",
+				"data": {
+					"title": "Role",
+					"company": "Eiffage",
+					"company_url": "https://www.eiffage.com",
+					"period": "YYYY — YYYY",
+					"location": "City",
+					"summary": "[Placeholder] One line on scope: team, product, stack.",
+					"highlights": "Achievement one\nAchievement two",
+					"sort": 5,
+					"logo": "/logos/eiffage.svg",
+					"stack": "Stack · e.g. TypeScript · React · AWS"
+				}
+			},
+			{
+				"id": "role-zlio",
+				"slug": "role-zlio",
+				"status": "published",
+				"data": {
+					"title": "CTO & Co-founder",
+					"company": "Zlio.com",
+					"period": "2005 – 2011",
+					"location": "Israel",
+					"summary": "Global e-commerce startup hosting 300k+ personalised online shops.",
+					"highlights": "Processed hundreds of XML / CSV product feeds with millions of records in Python\nScaled the company from 0 to 18 people across Israel, France, Germany and the US",
+					"sort": 6,
+					"logo": "/logos/zlio.png",
+					"stack": "PHP · PostgreSQL · Python · Linux HA cluster"
+				}
+			}
+		],
+		"music": [
+			{
+				"id": "yt-b0rrsbaht6c",
+				"slug": "yt-b0rrsbaht6c",
+				"status": "published",
+				"data": {
+					"title": "Playground of Love",
+					"video": "https://www.youtube.com/watch?v=b0rRSBahT6c",
+					"sort": 1,
+					"note": "Live · Strasbourg · 2020"
+				}
+			},
+			{
+				"id": "yt-muoylqgr-dm",
+				"slug": "yt-muoylqgr-dm",
+				"status": "published",
+				"data": {
+					"title": "Playground of Love",
+					"video": "https://www.youtube.com/watch?v=muOyLQGr_DM",
+					"sort": 2,
+					"note": "Piano"
+				}
+			},
+			{
+				"id": "yt-1ryrdsaywjk",
+				"slug": "yt-1ryrdsaywjk",
+				"status": "published",
+				"data": {
+					"title": "A Lifetime",
+					"video": "https://www.youtube.com/watch?v=1RYrdSAYWJk",
+					"sort": 3
+				}
+			},
+			{
+				"id": "yt-eoteg06d01y",
+				"slug": "yt-eoteg06d01y",
+				"status": "published",
+				"data": {
+					"title": "Melodica",
+					"video": "https://www.youtube.com/watch?v=EotEg06D01Y",
+					"sort": 4
+				}
+			},
+			{
+				"id": "yt-anv-vtqyaxi",
+				"slug": "yt-anv-vtqyaxi",
+				"status": "published",
+				"data": {
+					"title": "A New Year to Come",
+					"video": "https://www.youtube.com/watch?v=aNV_VtQyaXI",
+					"sort": 5
+				}
+			},
+			{
+				"id": "yt--vr-fd46u1y",
+				"slug": "yt--vr-fd46u1y",
+				"status": "published",
+				"data": {
+					"title": "And I Run",
+					"video": "https://www.youtube.com/watch?v=_vr_fD46u1Y",
+					"sort": 6,
+					"note": "Melodica"
+				}
+			},
+			{
+				"id": "yt-0zd--vi8nny",
+				"slug": "yt-0zd--vi8nny",
+				"status": "published",
+				"data": {
+					"title": "Variations sur Alright",
+					"video": "https://www.youtube.com/watch?v=0ZD-_Vi8nNY",
+					"sort": 7,
+					"note": "Part 1"
+				}
+			},
+			{
+				"id": "yt-mga8ycm1j5w",
+				"slug": "yt-mga8ycm1j5w",
+				"status": "published",
+				"data": {
+					"title": "Variations sur Alright",
+					"video": "https://www.youtube.com/watch?v=mgA8YCm1J5w",
+					"sort": 8,
+					"note": "Part 2"
+				}
+			},
+			{
+				"id": "yt-cig5of-tez0",
+				"slug": "yt-cig5of-tez0",
+				"status": "published",
+				"data": {
+					"title": "Daylight, Part I",
+					"video": "https://www.youtube.com/watch?v=cIg5oF-TeZ0",
+					"sort": 9,
+					"note": "Improvisation"
+				}
+			},
+			{
+				"id": "yt-fx5naaa0zzw",
+				"slug": "yt-fx5naaa0zzw",
+				"status": "published",
+				"data": {
+					"title": "Memories for 8",
+					"video": "https://www.youtube.com/watch?v=Fx5NaaA0ZZw",
+					"sort": 10,
+					"note": "Piano"
+				}
+			},
+			{
+				"id": "yt-x8iuqorlf4a",
+				"slug": "yt-x8iuqorlf4a",
+				"status": "published",
+				"data": {
+					"title": "Memories for 8",
+					"video": "https://www.youtube.com/watch?v=x8IuQORLf4A",
+					"sort": 11,
+					"note": "Live · Bar Giora, Tel Aviv · 2009"
+				}
+			},
+			{
+				"id": "yt-m60hzsn33as",
+				"slug": "yt-m60hzsn33as",
+				"status": "published",
+				"data": {
+					"title": "I Am Not From Here",
+					"video": "https://www.youtube.com/watch?v=m60HZsN33as",
+					"sort": 12,
+					"note": "Live · Bar Giora, Tel Aviv · 2009"
+				}
+			},
+			{
+				"id": "yt-fe-r9k0gg4u",
+				"slug": "yt-fe-r9k0gg4u",
+				"status": "published",
+				"data": {
+					"title": "Dreaming of You",
+					"video": "https://www.youtube.com/watch?v=fe_R9K0gG4U",
+					"sort": 13,
+					"note": "Piano"
+				}
+			}
+		]
+	}
+}

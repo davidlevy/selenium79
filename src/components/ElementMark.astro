@@ -1,0 +1,82 @@
+---
+// Brand mark: "selenium79" as a periodic-table cell —
+// selenium, Z = 34, atomic mass ≈ 78.97 → 79.
+---
+
+<span class="mark">
+	<span class="cell" aria-hidden="true">
+		<span class="z">34</span>
+		<span class="sym">Se</span>
+		<span class="mass">78.97</span>
+	</span>
+	<span class="word">selenium<b>79</b></span>
+</span>
+
+<style>
+	.mark {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-family: var(--font-mono), ui-monospace, monospace;
+	}
+
+	.cell {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 2.4rem;
+		height: 2.4rem;
+		color: var(--color-brand);
+		background: color-mix(in srgb, var(--color-brand) 9%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-brand) 55%, transparent);
+		transition: background var(--transition-base);
+	}
+
+	:global(a:hover) .cell {
+		background: color-mix(in srgb, var(--color-brand) 16%, transparent);
+	}
+
+	.z,
+	.mass {
+		position: absolute;
+		left: 0.2rem;
+		font-size: 0.44rem;
+		line-height: 1;
+		letter-spacing: 0.02em;
+	}
+
+	.z {
+		top: 0.2rem;
+	}
+
+	.mass {
+		bottom: 0.18rem;
+		opacity: 0.8;
+	}
+
+	.sym {
+		font-family: var(--font-heading), system-ui, sans-serif;
+		font-size: 0.95rem;
+		font-weight: 500;
+		letter-spacing: -0.02em;
+		color: var(--color-brand);
+	}
+
+	.word {
+		font-size: 0.8rem;
+		letter-spacing: 0.02em;
+		color: var(--color-text);
+	}
+
+	.word b {
+		font-weight: 400;
+		color: var(--color-brand);
+	}
+
+	/* phones: just the cell */
+	@media (max-width: 640px) {
+		.word {
+			display: none;
+		}
+	}
+</style>
