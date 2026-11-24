@@ -258,6 +258,46 @@
 					"type": "integer"
 				}
 			]
+		},
+		{
+			"slug": "posts",
+			"label": "Posts",
+			"labelSingular": "Post",
+			"supports": [
+				"drafts",
+				"revisions",
+				"preview",
+				"search",
+				"seo"
+			],
+			"urlPattern": "/blog/{slug}",
+			"fields": [
+				{
+					"slug": "title",
+					"label": "Title",
+					"type": "string",
+					"required": true,
+					"searchable": true
+				},
+				{
+					"slug": "excerpt",
+					"label": "Excerpt",
+					"type": "text",
+					"searchable": true
+				},
+				{
+					"slug": "featured_image",
+					"label": "Featured Image",
+					"type": "image",
+					"required": false
+				},
+				{
+					"slug": "content",
+					"label": "Content",
+					"type": "portableText",
+					"searchable": true
+				}
+			]
 		}
 	],
 	"taxonomies": [
@@ -307,6 +347,11 @@
 					"type": "custom",
 					"label": "Work",
 					"url": "/#work"
+				},
+				{
+					"type": "custom",
+					"label": "Blog",
+					"url": "/blog"
 				},
 				{
 					"type": "custom",

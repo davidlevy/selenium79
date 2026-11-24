@@ -7,29 +7,46 @@ export const GET: APIRoute = async ({ site, url }) => {
 	const siteTitle = settings?.title || "Studio";
 	const siteDescription = settings?.tagline || "Design & Development";
 
-	const { entries: projects } = await getEmDashCollection("projects", {
-		orderBy: { published_at: "desc" },
-		limit: 20,
-	});
+	const [projects, posts] = await Promise.all([
+		getEmDashCollection("projects", {
+			orderBy: { published_at: "desc" },
+			limit: 20,
+		}),
+		getEmDashCollection("posts", {
+			orderBy: { published_at: "desc" },
+			limit: 20,
+		}),
+	]);
 
-	const items = projects
-		.map((project) => {
-			if (!project.data.publishedAt) return null;
-			const pubDate = project.data.publishedAt.toUTCString();
-
-			const projectUrl = `${siteUrl}/work/${project.id}`;
-			const title = escapeXml(project.data.title || "Untitled");
-			const description = escapeXml(project.data.summary || "");
-
+	const items = [
+		...projects.entries.map((e) => ({
+			entry: e,
+			path: `/work/${e.id}`,
+			description: e.data.summary,
+		})),
+		...posts.entries.map((e) => ({
+			entry: e,
+			path: `/blog/${e.id}`,
+			description: e.data.excerpt,
+		})),
+	]
+		.filter(({ entry }) => entry.data.publishedAt)
+		.sort(
+			(a, b) =>
+				b.entry.data.publishedAt!.getTime() -
+				a.entry.data.publishedAt!.getTime(),
+		)
+		.slice(0, 20)
+		.map(({ entry, path, description }) => {
+			const link = `${siteUrl}${path}`;
 			return `    <item>
-      <title>${title}</title>
-      <link>${projectUrl}</link>
-      <guid isPermaLink="true">${projectUrl}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <description>${description}</description>
+      <title>${escapeXml(entry.data.title || "Untitled")}</title>
+      <link>${link}</link>
+      <guid isPermaLink="true">${link}</guid>
+      <pubDate>${entry.data.publishedAt!.toUTCString()}</pubDate>
+      <description>${escapeXml(description || "")}</description>
     </item>`;
 		})
-		.filter(Boolean)
 		.join("\n");
 
 	const rss = `<?xml version="1.0" encoding="UTF-8"?>
