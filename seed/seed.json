@@ -300,7 +300,7 @@
 				{
 					"slug": "video_url",
 					"label": "Video URL (YouTube)",
-					"type": "string"
+					"type": "url"
 				}
 			]
 		}
