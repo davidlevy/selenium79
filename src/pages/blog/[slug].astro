@@ -20,6 +20,13 @@ const seo = getSeoMeta(post, {
 	defaultOgImage: post.data.featured_image?.src,
 });
 const date = post.data.publishedAt;
+// `content` is Portable Text in the seed schema but a plain text field in
+// production: render plain text as paragraphs, Portable Text as usual.
+const body: unknown = post.data.content;
+const paragraphs =
+	typeof body === "string"
+		? body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+		: null;
 ---
 
 <Base
@@ -54,7 +61,13 @@ const date = post.data.publishedAt;
 		}
 
 		<div class="content" {...post.edit.content}>
-			<PortableText value={post.data.content} />
+			{
+				paragraphs ? (
+					paragraphs.map((p) => <p set:text={p} />)
+				) : (
+					<PortableText value={post.data.content} />
+				)
+			}
 		</div>
 	</article>
 </Base>
@@ -99,6 +112,10 @@ const date = post.data.publishedAt;
 
 	.content {
 		line-height: var(--leading-relaxed);
+	}
+
+	.content :global(p) {
+		white-space: pre-line;
 	}
 
 	.content :global(p),
