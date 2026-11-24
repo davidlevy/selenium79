@@ -296,6 +296,11 @@
 					"label": "Content",
 					"type": "portableText",
 					"searchable": true
+				},
+				{
+					"slug": "video_url",
+					"label": "Video URL (YouTube)",
+					"type": "url"
 				}
 			]
 		}
