@@ -31,3 +31,6 @@ npm-debug.log*
 # EmDash CLI generated artefacts
 .emdash/types.ts
 .emdash/schema.json
+
+# Genere par adama_site/publish.sh
+public/adama/
